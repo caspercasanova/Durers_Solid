@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://dhcdrcor3saue"]
+
+[ext_resource type="Script" path="res://addons/beehave/nodes/leaves/action.gd" id="1_ifyj2"]
+
+[node name="set_navigation_target_to_random_vec_in_range" type="Node"]
+script = ExtResource("1_ifyj2")

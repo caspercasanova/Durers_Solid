@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://cbd53jlt1fn23"]
+
+[ext_resource type="Script" path="res://npcs/conditions/weapon_is_in_the_area.gd" id="1_01v43"]
+
+[node name="weapon_is_in_the_area" type="Node"]
+script = ExtResource("1_01v43")

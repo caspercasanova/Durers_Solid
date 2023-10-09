@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://dewb36vpsccil"]
+
+[ext_resource type="Script" path="res://npcs/actions/pickup_nearby_weapon.gd" id="1_o1uyj"]
+
+[node name="pickup_nearby_weapon" type="Node"]
+script = ExtResource("1_o1uyj")

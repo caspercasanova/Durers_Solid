@@ -1,0 +1,8 @@
+[gd_scene load_steps=3 format=3 uid="uid://0cb6t50n7mph"]
+
+[ext_resource type="PackedScene" uid="uid://dsy3n8qaxjlwo" path="res://npcs/skull/skull.glb" id="1_pcvkn"]
+[ext_resource type="Script" path="res://npcs/skull/skull.gd" id="2_fnxq6"]
+
+[node name="skull" instance=ExtResource("1_pcvkn")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
+script = ExtResource("2_fnxq6")

@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://ckw45u5b45v1l"]
+
+[ext_resource type="Script" path="res://addons/beehave/nodes/leaves/action.gd" id="1_l7ag2"]
+
+[node name="move_until_group_enters_ao" type="Node"]
+script = ExtResource("1_l7ag2")

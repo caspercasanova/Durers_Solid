@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://cvgw14ypl0y8r"]
+
+[ext_resource type="Script" path="res://npcs/actions/move_to_random_location.gd" id="1_e827g"]
+
+[node name="move_to_random_location" type="Node"]
+script = ExtResource("1_e827g")

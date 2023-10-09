@@ -1,0 +1,131 @@
+[gd_scene load_steps=15 format=3 uid="uid://h2yoacsg6vvy"]
+
+[ext_resource type="Script" path="res://structures/turret/turret.gd" id="1_tdvbm"]
+[ext_resource type="PackedScene" uid="uid://cjhu7uxv2kq34" path="res://assets/objects/laser.tscn" id="2_oauqu"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ywetd"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_8q1gj"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ka4mh"]
+albedo_color = Color(0, 0, 0, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_0hu4l"]
+material = SubResource("StandardMaterial3D_ka4mh")
+size = Vector3(0.1, 0.1, 0.1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_4d3ge"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_6mti3"]
+material = SubResource("StandardMaterial3D_ka4mh")
+
+[sub_resource type="BoxMesh" id="BoxMesh_kkjfl"]
+material = SubResource("StandardMaterial3D_ka4mh")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_s8i1x"]
+albedo_color = Color(0, 0.164706, 1, 1)
+emission_enabled = true
+emission = Color(0, 0.25098, 0.45098, 1)
+emission_energy_multiplier = 16.0
+
+[sub_resource type="SphereMesh" id="SphereMesh_wgw20"]
+material = SubResource("StandardMaterial3D_s8i1x")
+radius = 0.1
+height = 0.2
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_56xtx"]
+material = SubResource("StandardMaterial3D_ka4mh")
+top_radius = 0.05
+bottom_radius = 0.05
+height = 0.9
+
+[sub_resource type="BoxMesh" id="BoxMesh_go1t6"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_rtket"]
+radius = 11.002
+
+[node name="turret" type="RigidBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+script = ExtResource("1_tdvbm")
+
+[node name="base" type="CollisionShape3D" parent="."]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 0.7, 0, 0, 0, 1, 0, -0.2, 0)
+shape = SubResource("BoxShape3D_ywetd")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="base"]
+transform = Transform3D(1, 0, 0, 0, 0.4, 0, 0, 0, 1, 0, -0.3, 0)
+mesh = SubResource("BoxMesh_8q1gj")
+
+[node name="body" type="CollisionShape3D" parent="."]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.2, 0)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="body"]
+transform = Transform3D(0.4, 0, 0, 0, 1, 0, 0, 0, 0.4, 0, 0.4, 0)
+mesh = SubResource("BoxMesh_8q1gj")
+
+[node name="head" type="CollisionShape3D" parent="."]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 0)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="head"]
+transform = Transform3D(1, 0, 0, 0, 0.2, 0, 0, 0, 1, 0, -0.3, 0)
+mesh = SubResource("BoxMesh_8q1gj")
+
+[node name="Node3D" type="Node3D" parent="head"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.1, 0)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="head/Node3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1.8, -0.528605, 0.8, 0.3)
+mesh = SubResource("BoxMesh_0hu4l")
+
+[node name="alert_light" type="CollisionShape3D" parent="head"]
+unique_name_in_owner = true
+transform = Transform3D(0.16, 0, 0, 0, 1, 0, 0, 0, 0.2, -0.4, 0.2, -0.4)
+shape = SubResource("BoxShape3D_4d3ge")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="head/alert_light"]
+transform = Transform3D(1, 0, 0, 0, 0.2, 0, 0, 0, 1, 0, -0.3, 0)
+mesh = SubResource("BoxMesh_6mti3")
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="head/alert_light"]
+transform = Transform3D(0.21, 0, 0, 0, 0.66, 0, 0, 0, 0.3, 0, 0, 0)
+mesh = SubResource("BoxMesh_kkjfl")
+
+[node name="MeshInstance3D3" type="MeshInstance3D" parent="head/alert_light"]
+transform = Transform3D(6.25, 0, 0, 0, 1, 0, 0, 0, 5, 0, 0.3, 0)
+mesh = SubResource("SphereMesh_wgw20")
+skeleton = NodePath("../../..")
+
+[node name="Gun" type="MeshInstance3D" parent="head"]
+unique_name_in_owner = true
+transform = Transform3D(0.2, 0, 0, 0, 1, 0, 0, 0, 0.2, 0, -0.1, 0.6)
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="head/Gun"]
+transform = Transform3D(5, 0, 0, 0, 1, 0, 0, 0, 5, 0, 0.9, 0)
+mesh = SubResource("CylinderMesh_56xtx")
+skeleton = NodePath("../../..")
+
+[node name="MeshInstance3D3" type="MeshInstance3D" parent="head/Gun"]
+mesh = SubResource("BoxMesh_go1t6")
+skeleton = NodePath("../../..")
+
+[node name="Marker3D" type="Marker3D" parent="head/Gun"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+
+[node name="target_path" type="Node3D" parent="head/Gun/Marker3D"]
+unique_name_in_owner = true
+transform = Transform3D(-5, 8.74228e-08, 0, -4.37114e-07, -1, 0, 0, 0, 5, 0, -0.0999999, -7.15256e-07)
+
+[node name="laser" parent="head/Gun/Marker3D/target_path" instance=ExtResource("2_oauqu")]
+unique_name_in_owner = true
+
+[node name="area_of_operation" type="Area3D" parent="."]
+unique_name_in_owner = true
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="area_of_operation"]
+shape = SubResource("SphereShape3D_rtket")
+
+[connection signal="body_entered" from="area_of_operation" to="." method="_on_area_of_operation_body_entered"]
+[connection signal="body_exited" from="area_of_operation" to="." method="_on_area_of_operation_body_exited"]

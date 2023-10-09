@@ -1,0 +1,44 @@
+[gd_scene load_steps=11 format=3 uid="uid://ba2r6kf6g1jj3"]
+
+[ext_resource type="Script" path="res://addons/beehave/nodes/beehave_tree.gd" id="1_63cfx"]
+[ext_resource type="Script" path="res://addons/beehave/nodes/composites/selector.gd" id="2_jmros"]
+[ext_resource type="PackedScene" uid="uid://db2ujlcjsy828" path="res://addons/examples/conditions/is_dead.tscn" id="3_bgmpf"]
+[ext_resource type="Script" path="res://addons/beehave/nodes/composites/sequence.gd" id="5_tsndd"]
+[ext_resource type="PackedScene" uid="uid://dhcdrcor3saue" path="res://npcs/actions/set_navigation_target_to_random_vec_in_range.tscn" id="8_aceyh"]
+[ext_resource type="Script" path="res://npcs/actions/set_navigation_target_to_random_vec_in_range.gd" id="9_jkc7c"]
+[ext_resource type="PackedScene" uid="uid://ckw45u5b45v1l" path="res://npcs/actions/move_until_group_enters_ao.tscn" id="10_fkmtt"]
+[ext_resource type="Script" path="res://npcs/actions/move_until_group_enters_ao.gd" id="11_veh50"]
+[ext_resource type="Script" path="res://addons/beehave/nodes/decorators/time_limiter.gd" id="12_upepk"]
+[ext_resource type="PackedScene" uid="uid://de4fre013klfq" path="res://npcs/actions/look_around.tscn" id="13_51rs0"]
+
+[node name="face_hugger" type="Node" node_paths=PackedStringArray("blackboard")]
+script = ExtResource("1_63cfx")
+blackboard = NodePath("@Node@21275")
+custom_monitor = true
+
+[node name="SelectorComposite" type="Node" parent="."]
+script = ExtResource("2_jmros")
+
+[node name="is_dead" parent="SelectorComposite" instance=ExtResource("3_bgmpf")]
+
+[node name="IsAlive" type="Node" parent="SelectorComposite"]
+script = ExtResource("2_jmros")
+
+[node name="search_in_random_area" type="Node" parent="SelectorComposite/IsAlive"]
+script = ExtResource("5_tsndd")
+
+[node name="set_navigation_target_to_random_vec_in_range" parent="SelectorComposite/IsAlive/search_in_random_area" instance=ExtResource("8_aceyh")]
+script = ExtResource("9_jkc7c")
+x = 15
+y = 0.5
+z = 15
+
+[node name="move_until_group_enters_ao" parent="SelectorComposite/IsAlive/search_in_random_area" instance=ExtResource("10_fkmtt")]
+script = ExtResource("11_veh50")
+group = "player"
+
+[node name="TimeLimiterDecorator" type="Node" parent="SelectorComposite/IsAlive"]
+script = ExtResource("12_upepk")
+wait_time = 3.0
+
+[node name="look_around" parent="SelectorComposite/IsAlive/TimeLimiterDecorator" instance=ExtResource("13_51rs0")]

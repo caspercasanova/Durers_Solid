@@ -1,0 +1,22 @@
+[gd_scene load_steps=4 format=3 uid="uid://cjhu7uxv2kq34"]
+
+[ext_resource type="Script" path="res://assets/objects/laser.gd" id="1_a25aq"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_otr4t"]
+albedo_color = Color(0.882353, 0, 0.168627, 1)
+emission_enabled = true
+emission = Color(0.882353, 0, 0.168627, 1)
+emission_energy_multiplier = 10.0
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_o7akm"]
+material = SubResource("StandardMaterial3D_otr4t")
+flip_faces = true
+top_radius = 0.02
+bottom_radius = 0.02
+height = 0.01
+
+[node name="laser" type="RayCast3D"]
+script = ExtResource("1_a25aq")
+
+[node name="Beam" type="MeshInstance3D" parent="."]
+mesh = SubResource("CylinderMesh_o7akm")

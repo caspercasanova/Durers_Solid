@@ -1,0 +1,17 @@
+[gd_scene load_steps=5 format=3 uid="uid://b6odilktg6xol"]
+
+[ext_resource type="Script" path="res://addons/beehave/nodes/composites/sequence.gd" id="1_0fpaj"]
+[ext_resource type="PackedScene" uid="uid://cvgw14ypl0y8r" path="res://npcs/actions/move_to_random_location.tscn" id="2_kkg3o"]
+[ext_resource type="Script" path="res://addons/beehave/nodes/decorators/time_limiter.gd" id="3_s4bty"]
+[ext_resource type="PackedScene" uid="uid://de4fre013klfq" path="res://npcs/actions/look_around.tscn" id="4_ntwhi"]
+
+[node name="Jitter" type="Node"]
+script = ExtResource("1_0fpaj")
+
+[node name="MoveToNewRandomLocation" parent="." instance=ExtResource("2_kkg3o")]
+
+[node name="TimeLimiterDecorator" type="Node" parent="."]
+script = ExtResource("3_s4bty")
+wait_time = 3.0
+
+[node name="look_around" parent="TimeLimiterDecorator" instance=ExtResource("4_ntwhi")]

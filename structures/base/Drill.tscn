@@ -1,0 +1,36 @@
+[gd_scene load_steps=5 format=3 uid="uid://bkotcx4m3v2jf"]
+
+[ext_resource type="Script" path="res://structures/base/Drill.gd" id="1_oq0ha"]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_2ngoo"]
+top_radius = 0.25
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_5ffm8"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_ld5pd"]
+radius = 3.0
+
+[node name="Drill" type="Node3D"]
+script = ExtResource("1_oq0ha")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+mesh = SubResource("CylinderMesh_2ngoo")
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="."]
+
+[node name="MeshInstance3D3" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.3, 0, 0, 0, 1, 0, 2, 0)
+mesh = SubResource("CylinderMesh_5ffm8")
+
+[node name="Drill_Spawn" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0)
+
+[node name="ResourceZone" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="ResourceZone"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, 0)
+shape = SubResource("CylinderShape3D_ld5pd")
+
+[connection signal="body_entered" from="ResourceZone" to="." method="_on_resource_zone_body_entered"]

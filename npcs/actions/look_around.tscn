@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://de4fre013klfq"]
+
+[ext_resource type="Script" path="res://npcs/actions/look_around.gd" id="1_0m155"]
+
+[node name="look_around" type="Node"]
+script = ExtResource("1_0m155")

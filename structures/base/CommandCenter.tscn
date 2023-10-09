@@ -1,0 +1,16 @@
+[gd_scene load_steps=2 format=3 uid="uid://j2mro8rwu4ef"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_igvb1"]
+
+[node name="CommandCenter" type="Node3D"]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(3.9, 0, 0, 0, 1, 0, 0, 0, 3.4, 0, 0.5, 0)
+mesh = SubResource("BoxMesh_igvb1")
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="."]
+transform = Transform3D(2.73, 0, 0, 0, 1, 0, 0, 0, 2.04, 0, 1.5, 0)
+mesh = SubResource("BoxMesh_igvb1")
+
+[node name="CommandCenter_Spawn" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2.02579)
