@@ -1,14 +1,14 @@
 [gd_scene load_steps=39 format=3]
 
-[ext_resource type="Script" path="res://fps_player_controller/player_character/player_character.gd" id="1_lyojb"]
-[ext_resource type="Script" path="res://fps_player_controller/player_character/HUD.gd" id="2_k8mux"]
+[ext_resource type="Script" path="res://fps_template_world/World/player_character.gd" id="1_lyojb"]
+[ext_resource type="Script" path="res://fps_template_world/World/HUD.gd" id="2_k8mux"]
 [ext_resource type="Texture2D" uid="uid://bjh5ic6qy4jtl" path="res://assets/PNG/hud_assets/crosshair001.png" id="3_3ots0"]
 [ext_resource type="Environment" uid="uid://bqp54syxqnqww" path="res://fps_template_world/World/world_environment.tres" id="4_kbejb"]
 [ext_resource type="Script" path="res://fps_player_controller/Weapon_State_Machine/Weapon_State_Machine.gd" id="5_7gu04"]
 [ext_resource type="Resource" uid="uid://yc1f2j7pl4vr" path="res://weapons/blaster_i/blasterI.tres" id="7_i3rwm"]
-[ext_resource type="Resource" uid="uid://c1jg0ifn7yvve" path="res://weapons/blaster_n/blasterN.tres" id="9_tcc52"]
-[ext_resource type="PackedScene" uid="uid://bvlnghquw6pe2" path="res://weapons/blaster_n/blasterN.glb" id="10_wwypk"]
-[ext_resource type="PackedScene" uid="uid://dhebkmfqs0d6r" path="res://weapons/blaster_l/blasterL.glb" id="11_ilien"]
+[ext_resource type="Resource" uid="uid://c1jg0ifn7yvve" path="res://weapons/uzi/blasterN.tres" id="9_tcc52"]
+[ext_resource type="PackedScene" uid="uid://bvlnghquw6pe2" path="res://weapons/uzi/blasterN.glb" id="10_wwypk"]
+[ext_resource type="PackedScene" uid="uid://dhebkmfqs0d6r" path="res://weapons/electro_gun/blasterL.glb" id="11_ilien"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_73v4a"]
 height = 1.7

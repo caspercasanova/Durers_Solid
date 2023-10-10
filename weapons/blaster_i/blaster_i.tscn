@@ -1,6 +1,64 @@
 [gd_scene load_steps=10 format=3 uid="uid://7m1jyy08au1v"]
 
-[ext_resource type="Script" path="res://weapons/pick_up/Weapon_Pick_Up.gd" id="1_7bvbn"]
+[sub_resource type="GDScript" id="GDScript_bttga"]
+script/source = "extends RigidBody3D
+
+@export var _weapon_name: String
+@export var _current_ammo: int
+@export var _reserve_ammo: int
+@onready var barrel: Marker3D = $Barrel
+var weapon_resource: Array[Weapon_Resource]
+const TYPE = \"Weapon\"
+
+var Pick_Up_Ready: bool = false
+@onready var timer: Timer = $Timer
+var can_attack = true: set = set_can_attack, get = get_can_attack;
+
+func set_can_attack(_can_attack):
+	can_attack = _can_attack
+func get_can_attack():
+	return can_attack
+ 
+
+func call_delayed(callable: Callable, delay: float):
+	get_tree().create_timer(delay, false).connect('timeout', callable)
+
+
+func _ready():
+	await get_tree().create_timer(2.0).timeout
+	Pick_Up_Ready = true
+
+func Set_Ammo(w_name: String, c_ammo : int, r_ammo : int):
+	if w_name == _weapon_name:
+		_current_ammo = c_ammo
+		_reserve_ammo = r_ammo
+
+
+func attack(actor, target):
+	if !can_attack: 
+		return 
+	
+	
+	set_can_attack(false)
+	call_delayed(func(): set_can_attack(true), 100)
+
+
+
+func LaunchProjectile(Point: Vector3):
+	var Direction = (Point - barrel.global_transform.origin).normalized()
+	var Projectile = Current_Weapon.Projectile_To_Load.instantiate()
+
+	Bullet_Point.add_child(Projectile)
+	Add_Signal_To_HUD.emit(Projectile)
+	
+	var Projectile_RID = Projectile.get_rid()
+	
+	Collision_Exclusion.push_back(Projectile_RID)
+	Projectile.tree_exited.connect(Remove_Exclusion.bind(Projectile_RID))
+	
+	Projectile.set_linear_velocity(Direction*Current_Weapon.Projectile_Velocity)
+	Projectile.Damage = Current_Weapon.Damage
+"
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_x17jo"]
 resource_name = "metal"
@@ -147,7 +205,7 @@ points = PackedVector3Array(-0.0300078, -0.175, 0.044953, 0.0299922, -0.175, 0.0
 [node name="blasterI" type="RigidBody3D"]
 collision_layer = 8
 collision_mask = 13
-script = ExtResource("1_7bvbn")
+script = SubResource("GDScript_bttga")
 _weapon_name = "blasterI"
 _current_ammo = 30
 _reserve_ammo = 30
@@ -160,3 +218,8 @@ skeleton = NodePath("")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.15, 0, -0.15)
 shape = SubResource("ConvexPolygonShape3D_4b68w")
+
+[node name="Timer" type="Timer" parent="."]
+
+[node name="Barrel" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.147645, 0.0454339, 0.319874)

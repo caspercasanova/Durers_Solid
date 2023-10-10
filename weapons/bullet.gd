@@ -9,7 +9,7 @@ func _on_body_entered(body):
 		body.Hit_Successful(Damage)
 		emit_signal("Hit_Successfull")
 
-	queue_free()
+#	queue_free()
 
 func _on_timer_timeout():
 	queue_free()

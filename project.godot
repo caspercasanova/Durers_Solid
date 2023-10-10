@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Durers_Solid"
-run/main_scene="res://vehicles/humber/humber.tscn"
+run/main_scene="res://scenes/AI_Land.tscn"
 config/features=PackedStringArray("4.1", "Forward Plus")
 config/icon="res://icon.svg"
 

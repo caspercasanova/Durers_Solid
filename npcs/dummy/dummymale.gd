@@ -4,6 +4,7 @@ class_name Dummy extends CharacterBody3D
 # https://www.youtube.com/watch?v=rdUgf6r7w2Q
 # https://github.com/ValveSoftware/source-sdk-2013/blob/master/sp/src/game/server/hl2/npc_combine.cpp
 @export_category('Dummy')
+# maybe make a combat navigation agent and a non combat one or a switch statement for different params
 @onready var navigation_agent: NavigationAgent3D = $NavigationAgent3D
 @onready var condition_label := %ConditionLabel
 @onready var action_label := %ActionLabel
@@ -30,33 +31,39 @@ var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 @export var max_energy := 100
 # determine AI cowers and other things
 @export var max_chaos := 100 
-@export var max_zombification := 100 
+@export var max_zombification := 100
 
-@export var melee_range: int = 1;
-@export var melee_damage: int = 10
+# make global  
+func call_delayed(callable: Callable, delay: float):
+	get_tree().create_timer(delay, false).connect('timeout', callable)
+# helper? 
+func distance_between_two_vectors_is_in_range(pos1: Vector3, pos2: Vector3, threshold: float) -> bool:
+	return pos1.distance_to(pos2) <= threshold
+
+ # because of a bug that occurs with _frame or something. 
+# fixable once i learn more about godot loading and preloading
+# should bake mesh and wait a second before loading to the map
+var navigation_is_synced = false 
+
 
 
 # need to find this once a better model comes
 var radius = '902371-23712-37123-98173-1973-1298371-39-13871-39871-3981273'
 
-# because of a bug that occurs with _frame or something. 
-# fixable once i learn more about godot loading and preloading
-# should bake mesh and wait a second before loading to the map
-var navigation_is_synced = false 
-
-var current_health = max_health: set = set_health, get = get_health;
-func set_health(new_health):
-	current_health = new_health
-func get_health():
-	return current_health
 
 
-var current_ammo : int = 10
-var ammo_is_low = false
+enum Animations {
+	None,
+	RELOADING
+}
+func animation_switch(_animation: Animations):
+	match Animations:
+		Animations.RELOADING:
+			print("Reloading")
+		_:
+			print("Default case")
 
 
-# figure this out 
-var current_weapon = null
 
 
 enum Alert_State {
@@ -94,10 +101,8 @@ func get_posture():
 var is_in_vehicle := false;
 
 ###################################
-# Make actions to disable other future actions
+# Make actions to disable other future behvaiors
 ###################################
-
-
 
 # spatial awareness / short term memory
 # creatively clear these
@@ -111,6 +116,7 @@ var group_in_area = {
 }
 var rally_points_in_area = {}
 var outposts_in_area = {}
+# Order Class: destination and target to inspect
 var current_orders = {}
 
 # Senses
@@ -130,12 +136,13 @@ var ignore_all_sound = false
 # changes based on class?
 enum Target_Priorities {}
 # Targeting and Awareness
-var current_target : Node = null
+
 # might just mkae this a timer always incrementing
 var time_since_last_attack: int = 0;
 var time_since_last_damage_taken: int = 0;
 
 # edit these, there are duplicates
+# make a timer for these
 var enemy_occluder: Object # The entity my enemy is hiding behind.
 var sum_damage: float # How much consecutive damage I've received
 var last_damage_time: float # Last time I received damage
@@ -147,9 +154,15 @@ var next_weapon_search_time: float # Next time to search for a better weapon
 var is_pending_weapon: String # The NPC should create and equip this weapon.
 var ignore_unseen_enemies: bool
 
+# wont be implemented but will be fucking cool for 
+# thingsl ike defusing and medkits
+var random_button_sequences = null
 
 
-# cover systems
+
+"""
+#####################  Cover Awareness
+""" 
 
 # Function to find a cover position for an entity
 func find_cover_pos(entity: Object, result: Vector3) -> bool:
@@ -179,6 +192,7 @@ func is_valid_shoot_position(cover_location: Vector3, node: Object, hint: Object
 # Function to test a shoot position
 func test_shoot_position(shoot_pos: Vector3, target_pos: Vector3) -> bool:
 	# Your GDScript logic here
+	# raytrace from shoot posisition at level of hand to target
 	return false
 
 # Function to check if a position is a cover position
@@ -198,6 +212,15 @@ func max_tactical_lateral_movement() -> float:
 func NotifyFriendsOfDamage():
 	# look this up on github
 	return
+
+
+func find_cover():
+	# get nearby cover nodes
+	# run to cover node
+	# take cover
+	print("I am running to cover")
+	print("I am in cover")
+	return 
 
 
 
@@ -222,6 +245,12 @@ func update_debug_text(condition, action):
 	_on_action_label_draw(action)
 
 
+
+"""
+##### #####################
+##################### GENERIC + MOVEMENT + Collision Signals
+"""
+
 func _ready() -> void:
 	# These values need to be adjusted for the actor's speed
 	# and the navigation layout.
@@ -245,6 +274,10 @@ func _physics_process(_delta):
 	# plus parachute action
 	return
 
+"""
+NAVIGATION + MOVEMENT
+"""
+
 func set_navigation_agent_target(movement_target: Vector3):
 	navigation_agent.set_target_position(movement_target)
 
@@ -264,8 +297,6 @@ func find_spot_for_NPC_in_radius(startPos: Vector3, radius: float, npc: Node, ou
 	result = startPos + Vector3(randf(), randf(), randf()).normalized() * radius
 	return result
 	
-
-
 
 func _on_velocity_computed(safe_velocity: Vector3):
 	velocity = safe_velocity
@@ -316,12 +347,31 @@ func _on_area_of_operation_body_exited(body: Node3D) -> void:
 		print('Erasing a weapon in the area')
 		weapons_in_the_area.erase(body.get_instance_id())
 		print(weapons_in_the_area)
+
+func get_all_current_collisions():
+	for i in get_slide_collision_count():
+		var collision = get_slide_collision(i)
+		print("I collided with ", collision.get_collider().name)
+
+
+func get_random_vector(xrange = 5.0, yrange = 5.0, zrange = 5.0) -> Vector3:
+	return Vector3(randf_range(-xrange, xrange), randf_range(-yrange, yrange), randf_range(-zrange, zrange))
+
+
+
+"""
+##################### Will have more methods pertaining to current statuses
+"""
+
+var current_health = max_health: set = set_health, get = get_health;
+func set_health(new_health):
+	current_health = new_health
+func get_health():
+	return current_health
 	
 
-
-
-
-
+func die() -> void:
+	queue_free()
 
 func is_alive():
 	return current_health > 0
@@ -341,36 +391,7 @@ func critical_damage_taken():
 func react_to_damage_taken():
 	pass
 
-
-
-func get_active_weapon():
-	if(!self.has_weapon()):
-		print('error: get_active_weapon i dont have a weapon')
-	return weapon_parent.get_child(0)
-
-func set_active_weapon(weapon: Node3D):
-	pass
-
-func has_weapon():
-	return weapon_parent.get_child_count() > 0
-
-func number_of_items_in_ao(group):
-	return group_in_area[group].size()
-	
-func pick_up_weapon(weapon: Node3D):
-	weapon_parent.add_child(weapon)
-	current_weapon = weapon
-	current_weapon.global_position = weapon_parent.global_position
-	return 
-
-func drop_weapon():
-	#spawn weapon into battle field ? 
-	weapon_parent.remove_children()
-	current_weapon = null;
-	return 
-
-
-
+# this will change 
 func take_damage(damage: float, attacker: Node) ->void:
 	current_health -= damage
 #	https://github.com/ValveSoftware/source-sdk-2013/blob/master/mp/src/game/server/baseentity.cpp#L1444
@@ -381,164 +402,8 @@ func take_damage(damage: float, attacker: Node) ->void:
 			print('Attacker does not have the method: "killed_unit"', attacker)
 		die()
 
-
-
 func spawn_gibs():
 	pass 
-
-func die() -> void:
-	queue_free()
-
-
-func is_in_range(pos1: Vector3, pos2: Vector3, threshold: float) -> bool:
-	return pos1.distance_to(pos2) <= threshold
-
-func attack_range():
-	# this is a value derived by the weapon being held
-	# no weapon = 1 meter range for melee
-	pass
-
-func should_attack_target() -> bool:
-	# Define the conditions for attacking a target (e.g., when in close range)
-	return false
-
-func perform_melee():
-	print("I am Performing Melee")
-	# if melee hits play hit sounds
-	# play miss sound
-	return
-
-func should_melee() -> bool: 
-	if !target_node_is_close(current_target, melee_range): 
-		return false
-	if current_ammo != 0: 
-		return false
-	return true
-
-func shoot_at_target(target: Node3D):
-	print('Shoooting')
-	pass
-
-
-
-
-
-func get_all_current_collisions():
-	for i in get_slide_collision_count():
-		var collision = get_slide_collision(i)
-		print("I collided with ", collision.get_collider().name)
-
-func target_node(target_node: Node) -> void:
-	target_node = target_node
-	return 
-
-
-func find_cover():
-	# get nearby cover nodes
-	# run to cover node
-	# take cover
-	print("I am running to cover")
-	print("I am in cover")
-	return 
-
-# dont like this function, should be AO instead of entire tree
-func find_nearest_node_of_type(target_type: String, max_distance: float = 99999.0):
-	# Iterate through all nodes in the scene
-	var max_d = max_distance
-	var nearest_distance = 0
-	var nearest_node = null
-	
-	for node in get_tree().get_nodes_in_group(target_type):
-			var distance = global_transform.origin.distance_to(node.global_transform.origin)
-	
-			# Update the nearest node if a closer one is found
-			if distance < max_d:
-				nearest_distance = distance
-				nearest_node = node
-				
-	# Check if a nearest node was found
-	if nearest_node:
-		print("Nearest node of type ", target_type, " is: ", nearest_node)
-	else:
-		print("No node of type ", target_type, " found.")
-
-
-
-# Function to check if the target node is close based on a distance threshold
-func target_node_is_close(target_node: Node, distance_threshold: float) -> bool:
-	if(!target_node): 
-		return false
-	var distance = self.global_transform.origin.distance_to(target_node.global_transform.origin)
-	if distance <= distance_threshold:
-		return true
-	else:
-		return false
-
-
-
-# helper navigation functions
-func should_chase_current_target() -> bool:
-	# Define the conditions for chasing a target (e.g., when a player is nearby)
-	if !current_target:
-		return false
-	var should = target_node_is_close(current_target, 10)
-	return should
-
-func chase_target(target: Node3D, delta: float) -> void:
-	# Implement logic to chase the target (e.g., move towards the target's position)
-	# a move to target?  
-	pass
-
-
-func target_valid():
-	# this seems like a debugging method
-	# Implement logic to check if the target is valid (e.g., check if the target is a player)
-	# return is_instance_valid(target)
-	pass
-
-func get_random_vector(xrange = 5.0, yrange = 5.0, zrange = 5.0) -> Vector3:
-	return Vector3(randf_range(-xrange, xrange), randf_range(-yrange, yrange), randf_range(-zrange, zrange))
-
-
-func attack_target(target: Node3D) -> void:
-	# Implement logic to attack the target (e.g., reduce the target's health)
-	if target.has_method("take_damage"):
-		target.take_damage(melee_damage)
-	else: 
-		print('This enemy doesnt have a take_damage method')
-	pass
-
-func target_is_visible(target: Node3D) -> bool:
-	# Implement logic to check if the target is visible
-	return true
-
-func target_is_in_range(target: Node3D) -> bool:
-	# Implement logic to check if the target is in attack range
-	return true
-
-func move_towards_target():
-	# Implement logic to move towards the target
-	pass
-
-func perform_attack():
-	# Implement the attack logic
-	pass
-
-
-
-func reload_weapon(next_magazine_ammo: int):
-	# get weapon 
-	# perform reload anim
-	current_ammo += next_magazine_ammo
-	return
-
-func should_reload_weapon():
-	if alert_state < Alert_State.ATTACKING && ammo_is_low:
-		return true
-		
-	# use a hueristic for #of enemies nearby and
-	return false
-		
 
 func should_retreat() -> bool:
 	# Define the conditions for retreating
@@ -560,6 +425,215 @@ func panic():
 	retreat()
 
 
+
+
+
+"""
+##################### Item / weapon Management
+"""
+
+
+# change this because its based on the tree? 
+# figure this out 
+var current_weapon = null
+func get_current_weapon() -> Node:
+	return weapon_parent.get_child(0)
+
+func set_current_weapon(weapon: Node3D):
+	pass
+
+func use_weapon():
+	# implements different weapon types
+	# Implemnets reload logic? 
+	pass
+
+
+
+var current_ammo : int = 5: set = set_current_ammo, get = get_current_ammo;
+func set_current_ammo(_current_ammo):
+	current_ammo = _current_ammo
+func get_current_ammo():
+	return current_ammo
+	
+
+var reload_time = 5: set = set_reload_time, get = get_reload_time;
+func set_reload_time(_reload_time):
+	reload_time = _reload_time
+func get_reload_time():
+	return reload_time
+	
+var is_reloading = false: set = set_is_reloading, get = get_is_reloading;
+func set_is_reloading(_is_reloading):
+	is_reloading = _is_reloading
+func get_is_reloading():
+	return is_reloading
+func reload_weapon():
+	set_is_reloading(true)
+	print('Is Reloading')
+	call_delayed(func(): 
+		set_is_reloading(false) 
+		set_current_ammo(10), 
+	get_reload_time())
+
+
+
+
+func should_reload_weapon():
+#	if alert_state < Alert_State.ATTACKING && ammo_is_low:
+#		return true
+		
+	# use a hueristic for #of enemies nearby and
+	return false
+
+
+func number_of_items_in_ao(group):
+	return group_in_area[group].size()
+
+func pick_up_item(item: Node3D):
+	# get type of item
+	# weapon / item and useMethod	
+	return
+# depricate this
+func pick_up_weapon(weapon: Node3D):
+	weapon_parent.add_child(weapon)
+	current_weapon = weapon
+	current_weapon.global_position = weapon_parent.global_position
+	return 
+
+func drop_weapon():
+	#spawn weapon into battle field ? 
+	weapon_parent.remove_children()
+	current_weapon = null;
+	return 
+
+func use_item():
+	pass
+
+func drop_item():
+	pass
+
+
+"""
+$$$$$$$$$$$$$$$ ATTACK METHODS
+
+############### 
+			TARGETING METHODS
+###############
+
+"""
+
+
+# this is a value derived by the weapon being held
+# no weapon = 1 meter range for melee
+# make getter + setter and set range on drop and pickup and weapon switch 
+var attack_range: int = 0: set = set_attack_range, get = get_attack_range;
+func set_attack_range(_attack_range):
+	attack_range = _attack_range
+func get_attack_range():
+	return attack_range
+
+
+var current_target : Node = null: set = set_current_target, get = get_current_target;
+func set_current_target(_target_node: Node):
+	current_target = _target_node
+func get_current_target():
+	return current_target 
+
+
+# dont like this function, should be AO instead of entire tree
+func find_nearest_node_in_group(target_type: String, max_distance: float = 99999.0) -> Node:
+	# Iterate through all nodes in the scene
+	var max_d = max_distance
+	var nearest_distance = 0
+	var nearest_node = null
+	
+	for node in get_tree().get_nodes_in_group(target_type):
+			var distance = global_transform.origin.distance_to(node.global_transform.origin)
+	
+			# Update the nearest node if a closer one is found
+			if distance < max_d:
+				nearest_distance = distance
+				nearest_node = node
+				
+	# Check if a nearest node was found
+	if nearest_node:
+		print("Nearest node of type ", target_type, " is: ", nearest_node)
+	else:
+		print("No node of type ", target_type, " found.")
+		
+	return nearest_node
+
+
+# should be simply firing current weapon and nothing more
+func attack_target(_target: Node3D = null) -> void:
+	var target = _target
+	if !_target: 
+		target = find_nearest_node_in_group("Target")
+	
+	if is_reloading:
+		return
+	if(!is_reloading && current_ammo <= 0):
+		reload_weapon()
+		return
+	
+	print('curr ammo  ',current_ammo, 'is_reloading   ',is_reloading)
+	rotate_gun_towards_target_position(target.global_position)
+	get_current_weapon().use_weapon(self, target.global_position)
+	
+
+func rotate_gun_towards_target_position(target: Vector3):
+	get_current_weapon().look_at(target)
+
+
+func should_attack_target() -> bool:
+	# Define the conditions for attacking a target (e.g., when in close range)
+	return false
+
+func target_is_visible(target: Node3D) -> bool:
+	# Implement logic to check if the target is visible
+	return true
+
+# Function to check if the target node is close based on a distance threshold
+func target_is_in_range(target_node: Node3D, distance_threshold: float) -> bool:
+	if(!target_node): 
+		return false
+	var distance = self.global_transform.origin.distance_to(target_node.global_transform.origin)
+	if distance <= distance_threshold:
+		return true
+	else:
+		return false
+
+func target_valid():
+	# this seems like a debugging method
+	# Implement logic to check if the target is valid (e.g., check if the target is a player)
+	# return is_instance_valid(target)
+	pass
+
+func move_towards_target():
+	# Implement logic to move towards the target
+	pass
+
+func chase_target(target: Node3D, delta: float) -> void:
+	# Implement logic to chase the target (e.g., move towards the target's position)
+	# a move to target?  
+	pass
+
+# helper navigation functions
+func should_chase_current_target() -> bool:
+	# Define the conditions for chasing a target (e.g., when a player is nearby)
+	if !current_target:
+		return false
+	var should = target_is_in_range(current_target, 10)
+	return should
+
+
+
+
+
+
+"""
+############ Battlefield Actions
+"""
 
 func create_drop_zone(location: Vector3) :
 	# this will be were different items can be dropped by helicopters
@@ -584,6 +658,9 @@ func create_area_of_interest() -> Area3D:
 func delete_area_of_interest() -> void:
 	return 
 
+"""
+idk
+"""
 
 func get_up():
 	pass
@@ -594,14 +671,6 @@ func get_pushed(force: int):
 func get_thrown(force: int):
 	pass
 
-func pick_up_item():
-	pass
-	
-func use_item():
-	pass
-
-func drop_item():
-	pass
 
 func inspect_random_nearby_item():
 	pass
@@ -673,44 +742,6 @@ MOA - Military Operations Area: In the context of aviation and airspace, this te
 LZ - Landing Zone: A designated area where helicopters or other aircraft can land troops or equipment.
 
 DZ - Drop Zone: An area where airborne troops or supplies are airdropped from aircraft.
-
-
-
-
-
-
-
-get random area next to node
-   var screenSize = get_viewport().get_visible_rect().size
-   var rng = RandomNumberGenerator.new()
-   var rng2 = RandomNumberGenerator.new()
-   var rng3 = RandomNumberGenerator.new()
-   var rng4 = RandomNumberGenerator.new()
-   var rndX = rng.randi_range(0, screenSize.x)
-   var rndY = rng.randi_range(0, screenSize.y)
-   var rndX2 = rng2.randi_range(0, screenSize.x)
-   var rndY2 = rng2.randi_range(0, screenSize.y)
-   var rndX3 = rng3.randi_range(0, screenSize.x)
-   var rndY3 = rng3.randi_range(0, screenSize.y)
-   var rndX4 = rng.randi_range(0, screenSize.x)
-   var rndY4 = rng.randi_range(0, screenSize.y)
-
-   $Area2D.position = Vector2(rndX, rndY)
-   $Area2D2.position = Vector2(rndX2, rndY2)
-   $Area2D3.position = Vector2(rndX3, rndY3)
-   $Area2D.position = Vector2(rndX4, rndY4)
-
-func _on_Timer_timeout():
-
-   var rng = RandomNumberGenerator.new()
-   var nextToggleSeconds = rng.randi_range(5, 15) 
-
-   $Area2D.visible = !$Area2D.visible # switch visibility
-   $Area2D2.visible = !$Area2D2.visible
-   $Area2D3.visible = !$Area2D3.visible
-   $Area2D3.visible = !$Area2D4.visible
-   $Timer.start(nextToggleSeconds)
-
 
 
 # Shooter

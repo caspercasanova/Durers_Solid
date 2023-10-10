@@ -12,7 +12,7 @@
 [ext_resource type="PackedScene" uid="uid://ccon75qoooj3t" path="res://structures/portal/portal_navigator.tscn" id="10_qgrrr"]
 [ext_resource type="Material" uid="uid://xqry12c1frvm" path="res://addons/kenney_prototype_tools/materials/green/material_05.tres" id="10_t0b3g"]
 [ext_resource type="PackedScene" uid="uid://ct8ip3wfofxm1" path="res://structures/portal/portal.tscn" id="11_yoewi"]
-[ext_resource type="PackedScene" uid="uid://2oxdgu03lnbk" path="res://addons/character-controller/example/main/player.tscn" id="13_v4lp8"]
+[ext_resource type="PackedScene" uid="uid://bk5fx6njiri84" path="res://fps_template_world/World/target.tscn" id="14_07hwm"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_nd1xr"]
 sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
@@ -142,6 +142,10 @@ material = ExtResource("5_uhbvw")
 transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 3.03333, 0.766667, -1.46667)
 material = ExtResource("6_0q4qk")
 
+[node name="WhiteBox3" type="CSGBox3D" parent="NavigationRegion3D/CSGCombiner3D/Node3D"]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -7.3, 0.766667, 14.2)
+material = ExtResource("6_0q4qk")
+
 [node name="WhiteBox2" type="CSGBox3D" parent="NavigationRegion3D/CSGCombiner3D/Node3D"]
 transform = Transform3D(-4.37114e-08, 0, 1, 0, 2.52, 0, -1, 0, -4.37114e-08, 11.3667, 6.37382, 7.86666)
 size = Vector3(1, 5, 1)
@@ -168,21 +172,15 @@ material = ExtResource("10_t0b3g")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22.9904, 3, 5.82738)
 safe_margin = 0.01
 debugging = true
-movement_speed = null
-acceleration = null
-jump_velocity = null
-max_health = null
-max_energy = null
-max_chaos = null
-max_zombification = null
-melee_range = null
-melee_damage = null
 
 [node name="dummy_ai" parent="dummymale" instance=ExtResource("9_8xtbk")]
 actor_node_path = NodePath("..")
 
+[node name="Camera3D" type="Camera3D" parent="dummymale"]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -1, 2, -3)
+
 [node name="MeshInstance3D" type="RigidBody3D" parent="." groups=["weapon"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.0244, 2, 28.4097)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.15198, 2, 34.1856)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="MeshInstance3D"]
 mesh = SubResource("SphereMesh_0k1g4")
@@ -190,5 +188,5 @@ mesh = SubResource("SphereMesh_0k1g4")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="MeshInstance3D"]
 shape = SubResource("SphereShape3D_buwgw")
 
-[node name="Player" parent="." instance=ExtResource("13_v4lp8")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 3, 0)
+[node name="Target" parent="." instance=ExtResource("14_07hwm")]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -22.986, 3.75, 40.8722)

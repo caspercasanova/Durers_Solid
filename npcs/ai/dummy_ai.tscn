@@ -2,9 +2,9 @@
 
 [ext_resource type="Script" path="res://addons/beehave/nodes/beehave_tree.gd" id="1_8dchw"]
 [ext_resource type="Script" path="res://addons/beehave/nodes/composites/selector.gd" id="2_1xte6"]
-[ext_resource type="Script" path="res://addons/beehave/nodes/leaves/condition.gd" id="3_m57qf"]
 [ext_resource type="Script" path="res://addons/beehave/nodes/composites/sequence.gd" id="4_2qi31"]
 [ext_resource type="PackedScene" uid="uid://dwj1yybtxx7r7" path="res://npcs/conditions/has_weapon.tscn" id="4_eg247"]
+[ext_resource type="Script" path="res://npcs/actions/attack_current_target.gd" id="4_nb1vb"]
 [ext_resource type="PackedScene" uid="uid://cbd53jlt1fn23" path="res://npcs/conditions/weapon_is_in_the_area.tscn" id="6_kve5r"]
 [ext_resource type="PackedScene" uid="uid://dewb36vpsccil" path="res://npcs/actions/pickup_nearby_weapon.tscn" id="7_rs3ca"]
 [ext_resource type="Script" path="res://addons/beehave/nodes/decorators/time_limiter.gd" id="9_x447u"]
@@ -14,44 +14,47 @@
 [ext_resource type="PackedScene" uid="uid://dhcdrcor3saue" path="res://npcs/actions/set_navigation_target_to_random_vec_in_range.tscn" id="13_5keeh"]
 [ext_resource type="Script" path="res://npcs/actions/set_navigation_target_to_random_vec_in_range.gd" id="14_q28aa"]
 
-[node name="dummy_ai" type="Node"]
+[node name="dummy_ai" type="Node" node_paths=PackedStringArray("blackboard")]
 script = ExtResource("1_8dchw")
+blackboard = NodePath("@Node@17996")
 custom_monitor = true
-blackboard = null
 
 [node name="SelectorComposite" type="Node" parent="."]
 script = ExtResource("2_1xte6")
 
-[node name="ConditionLeaf" type="Node" parent="SelectorComposite"]
-script = ExtResource("3_m57qf")
+[node name="Attack" type="Node" parent="SelectorComposite"]
+script = ExtResource("4_2qi31")
 
-[node name="IsAlive" type="Node" parent="SelectorComposite"]
+[node name="attack_current_target" type="Node" parent="SelectorComposite/Attack"]
+script = ExtResource("4_nb1vb")
+
+[node name="look_for_weapon" type="Node" parent="SelectorComposite"]
 script = ExtResource("2_1xte6")
 
-[node name="has_weapon" parent="SelectorComposite/IsAlive" instance=ExtResource("4_eg247")]
+[node name="has_weapon" parent="SelectorComposite/look_for_weapon" instance=ExtResource("4_eg247")]
 
-[node name="pick_up_neaby" type="Node" parent="SelectorComposite/IsAlive"]
+[node name="pick_up_neaby" type="Node" parent="SelectorComposite/look_for_weapon"]
 script = ExtResource("4_2qi31")
 
-[node name="weapon_is_in_the_area" parent="SelectorComposite/IsAlive/pick_up_neaby" instance=ExtResource("6_kve5r")]
+[node name="weapon_is_in_the_area" parent="SelectorComposite/look_for_weapon/pick_up_neaby" instance=ExtResource("6_kve5r")]
 
-[node name="pickup_nearby_weapon" parent="SelectorComposite/IsAlive/pick_up_neaby" instance=ExtResource("7_rs3ca")]
+[node name="pickup_nearby_weapon" parent="SelectorComposite/look_for_weapon/pick_up_neaby" instance=ExtResource("7_rs3ca")]
 
-[node name="search_in_random_area" type="Node" parent="SelectorComposite/IsAlive"]
+[node name="search_in_random_area" type="Node" parent="SelectorComposite/look_for_weapon"]
 script = ExtResource("4_2qi31")
 
-[node name="set_navigation_target_to_random_vec_in_range" parent="SelectorComposite/IsAlive/search_in_random_area" instance=ExtResource("13_5keeh")]
+[node name="set_navigation_target_to_random_vec_in_range" parent="SelectorComposite/look_for_weapon/search_in_random_area" instance=ExtResource("13_5keeh")]
 script = ExtResource("14_q28aa")
 x = 10
 y = 0.5
 z = 10
 
-[node name="move_until_group_enters_ao" parent="SelectorComposite/IsAlive/search_in_random_area" instance=ExtResource("11_b6ufh")]
+[node name="move_until_group_enters_ao" parent="SelectorComposite/look_for_weapon/search_in_random_area" instance=ExtResource("11_b6ufh")]
 script = ExtResource("12_j4a28")
 group = "weapon"
 
-[node name="TimeLimiterDecorator" type="Node" parent="SelectorComposite/IsAlive"]
+[node name="TimeLimiterDecorator" type="Node" parent="SelectorComposite/look_for_weapon"]
 script = ExtResource("9_x447u")
 wait_time = 3.0
 
-[node name="look_around" parent="SelectorComposite/IsAlive/TimeLimiterDecorator" instance=ExtResource("10_qa2vn")]
+[node name="look_around" parent="SelectorComposite/look_for_weapon/TimeLimiterDecorator" instance=ExtResource("10_qa2vn")]

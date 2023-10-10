@@ -1,7 +1,7 @@
 extends Node
-#https://github.com/ValveSoftware/source-sdk-2013/blob/0d8dceea4310fde5706b3ce1c70609d72a38efdf/sp/src/game/shared/takedamageinfo.h#L24
 class_name Damage_Source
 
+#https://github.com/ValveSoftware/source-sdk-2013/blob/0d8dceea4310fde5706b3ce1c70609d72a38efdf/sp/src/game/shared/takedamageinfo.h#L24
 # https://www.youtube.com/watch?v=oIrvZDDWxhU
 enum Damage_Types {
 	GENERIC = 0,
@@ -34,96 +34,139 @@ enum Damage_Types {
 	REMOVE_NO_RAGDOLL, # with this bit OR'd in, no ragdoll will be created, and the target will be quietly removed. use this to kill an entity that you've already got a server-side ragdoll for
 	PHYSGUN, # Hit by manipulator. Usually doesn't do any damage.
 	PLASMA, # Shot by Cremator
-	AIRBOAT, # Hit by the airboat's gun
 	DISSOLVE, # dissolving 
 	BLAST_SURFACE, # A blast on the surface of water that cannot harm things underwater
 	DIRECT,
-	BUCKSHOT, # not quite a bullet. Little, rounder, different.
+	BUCKSHOT, # not quite a bullet. Little, rounder, different
 };
 
-enum Bullet_Types {
-	CARBINE,
-	SMG,
-	M1911,
-	SNIPER,
-	RIFLE,
-}
+# add a damage for debug?
 
 # Create an example Ammo_t Dictionary
-var ammo = {
-	"pName": "",
-	"nDamageType": 0,
-	"eTracerType": 0,
-	"physicsForceImpulse": 0.0,
-	"nMinSplashSize": 0,
-	"nMaxSplashSize": 0,
-	"nFlags": 0,
-	"pPlrDmg": 0,
-	"pNPCDmg": 0,
-	"pMaxCarry": 0,
-	"pPlrDmgCVar": null,
-	"pNPCDmgCVar": null,
-	"pMaxCarryCVar": null
+var ammo_info = {
+	"Name": "",
+	"damage_type": 0,
+	"tracer_type": 0,
+	"physics_force_impulse": 0.0,
+	"min_splash_size": 0,
+	"max_splash_size": 0,
+	"flags": 0,
+	"player_damage": 0,
+	"NPC_damage": 0,
+	"max_carry": 0,
+	"player_damage_C_var": null,
+	"NPC_damage_C_var": null,
+	"max_carry_C_var": null,
+	"AMMO_FORCE_DROP_IF_CARRIED": false,
+	"AMMO_INTERPRET_PLRDAMAGE_AS_DAMAGE_TO_PLAYER": false # dont know what this is
+}
+
+
+enum Equipment {
+	Radio,
+	GrappleGun,
+	Parachute, 
+	Medic,
+	Ammo_Pounch, 
+	Spotter,
+}
+
+
+
+enum Melee_Weapons {
+	Bowie_Knife,
+	Fist, 
+	Bite,
+}
+
+
+# Need to investigat this
+enum Ray_Cast_Weapons {
+	Lazer_Rifle,
+	Flame_Thrower,
+	Electro_Curve_Gun,
+	Chaos_Gun,
+	Zombie_Gun,
+}
+
+
+enum Projectile_Weapons {
+	SemiAutoSecondary,
+	AutoSecondary,
+	AR,
+	SMG,
+	LMG,
+	MMG,
+	HMG,
+	Shotgun,
+	Sniper,
+	Bazooka,
+	Minigun, #prolly not super heavy machine gun  
+	Cannon, 
+	Mortar, 
+}
+
+enum Explosive_Devices {
+	TNT, 
+	C4,
+	Thrown, 
+	Smoke_Grenade, 
+	Dumb_Bomb
+}
+
+
+
+enum Rocket_Types {
+	Rocket,
+	Homing_Missle,
+	Swarm_Rocket,
+}
+
+
+# use for more of the gun resources 
+enum Bullet_Types {
+	STANDARD,
+	ARMOR_PIERCE,
+	EXPLOSIVE,
+	ELECTRO,
+	HOMING,
+	FREEZING,
+	CHAOS,
 }
 
 # Constants for AmmoTracer_t
-const TRACER_NONE = 0
-const TRACER_LINE = 1
-const TRACER_RAIL = 2
-const TRACER_BEAM = 3
-const TRACER_LINE_AND_WHIZ = 4
+enum TracerTypes {
+	TRACER_NONE,
+	TRACER_LINE,
+	TRACER_RAIL,
+	TRACER_BEAM,
+	TRACER_LINE_AND_WHIZ
+}
 
-# Constants for AmmoFlags_t
-const AMMO_FORCE_DROP_IF_CARRIED = 1
-const AMMO_INTERPRET_PLRDAMAGE_AS_DAMAGE_TO_PLAYER = 2
-
-# Example usage:
-var tracerType = TRACER_LINE
-var ammoFlags = AMMO_FORCE_DROP_IF_CARRIED
-
-
-# Constants for ammo type indices
-const MAX_AMMO_TYPES = 32
-const USE_CVAR = -1
 
 class AmmoType:
-	var pName: String = ""
-	var nDamageType: int = 0
-	var eTracerType: int = 0
-	var nMinSplashSize: int = 0
-	var nMaxSplashSize: int = 0
-	var nFlags: int = 0
-	var pPlrDmg: int = 0
-	var pNPCDmg: int = 0
-	var pMaxCarry: int = 0
-	var pPlrDmgCVar: String = ""
-	var pNPCDmgCVar: String = ""
-	var pMaxCarryCVar: String = ""
+	var Name: String = ""
+	var DamageType: Damage_Types = 0
+	var TracerType: int = 0
+	var MinSplashSize: int = 0
+	var MaxSplashSize: int = 0
+	var Flags: int = 0
+	var PlrDmg: int = 0
+	var NPCDmg: int = 0
+	var MaxCarry: int = 0
+	var PlrDmgCVar: String = ""
+	var NPCDmgCVar: String = ""
+	var MaxCarryCVar: String = ""
 	var physicsForceImpulse: float = 0.0
 
 
 
-
-# Assign values to the Dictionary
-#ammo["pName"] = "Example Ammo"
-#ammo["nDamageType"] = 42
-#ammo["eTracerType"] = 1
-#ammo["physicsForceImpulse"] = 5.0
-#ammo["nMinSplashSize"] = 10
-#ammo["nMaxSplashSize"] = 20
-#ammo["nFlags"] = 3
-#ammo["pPlrDmg"] = 20
-#ammo["pNPCDmg"] = 30
-#ammo["pMaxCarry"] = 100
-#ammo["pPlrDmgCVar"] = null
-#ammo["pNPCDmgCVar"] = null
-#ammo["pMaxCarryCVar"] = null
-
-# Accessing values in the Dictionary
-var ammo_name = ammo["pName"]
-var damage_type = ammo["nDamageType"]
-# Access other fields similarly...
-
+func fromBullet():
+	pass
+func fromRocket():
+	pass
+func fromMelee():
+	pass
 
 # Inflictor is the weapon or rocket (or player) that is dealing the damage.
 # Weapon is the weapon that did the attack.
@@ -134,7 +177,7 @@ func set_damage_info(p_inflictor, p_attacker, p_weapon, damage_force, damage_pos
 	# Implement the logic for your Set-like function here
 	# You can access the parameters and perform any required operations
 	# For example, you can print them for demonstration purposes:
-	
+
 	print("Inflictor: ", p_inflictor)
 	print("Attacker: ", p_attacker)
 	print("Weapon: ", p_weapon)

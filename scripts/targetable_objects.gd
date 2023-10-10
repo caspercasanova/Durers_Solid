@@ -3,7 +3,7 @@ extends RigidBody3D
 var Health = 999
 
 # convert to resource or can probably delete after morphing FPS code
-
+# change this to take damage
 func Hit_Successful(Damage, _Direction: Vector3 = Vector3.ZERO, _Position: Vector3 = Vector3.ZERO):
 	var Hit_Position = _Position - get_global_transform().origin 
 	Health -= Damage
