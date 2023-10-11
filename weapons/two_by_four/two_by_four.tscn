@@ -1,0 +1,29 @@
+[gd_scene load_steps=5 format=3 uid="uid://2v4twpsguyt0"]
+
+[ext_resource type="Script" path="res://weapons/two_by_four/two_by_four.gd" id="1_hncnx"]
+[ext_resource type="Material" uid="uid://d4kuxhbpjjs3s" path="res://assets/shader/simple_wood.tres" id="2_n3il8"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_h4fli"]
+material = ExtResource("2_n3il8")
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_5fxcv"]
+points = PackedVector3Array(0.5, 0.5, 0.5, 0.5, 0.5, -0.5, -0.5, 0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, -0.5, -0.5, 0.5, -0.5, -0.5, -0.5, 0.5, -0.5, -0.5, -0.5)
+
+[node name="twobyfour" type="RigidBody3D"]
+collision_layer = 8
+collision_mask = 13
+script = ExtResource("1_hncnx")
+
+[node name="wood" type="MeshInstance3D" parent="."]
+transform = Transform3D(-0.12, 8.74228e-09, 0, 1.04907e-08, 0.1, 6.93962e-08, 9.17129e-16, 8.74228e-09, -0.7938, -0.15, 0, -0.15)
+mesh = SubResource("BoxMesh_h4fli")
+skeleton = NodePath("")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(-0.12, 8.74228e-09, 0, 1.04907e-08, 0.1, 6.93962e-08, 9.17129e-16, 8.74228e-09, -0.7938, -0.15, 0, -0.15)
+shape = SubResource("ConvexPolygonShape3D_5fxcv")
+
+[node name="timer" type="Timer" parent="."]
+
+[node name="muzzle" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 1.74846e-07, 0, 1, 0, -1.74846e-07, 0, 1, -0.147645, 0.0454339, -0.854712)
