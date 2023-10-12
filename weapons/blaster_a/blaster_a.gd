@@ -29,7 +29,12 @@ func _ready():
 	pick_up_ready = true
 
 
-func use_weapon(actor, target):
+# unqueue when parent dies? idk
+# stat scaling for units?
+# https://www.youtube.com/watch?v=SzBScaXlfao
+
+# target prbpbaly not needed, but maybbe?
+func use_weapon(actor: Dummy, target: Node):
 	if !can_attack: 
 		return 
 	# add this type to the removing of bullets 
@@ -39,6 +44,8 @@ func use_weapon(actor, target):
 
 	var direction = -muzzle.global_transform.basis.z
 	var projectile = bullet.instantiate()
+	projectile.size = 1
+	print("proctile class  ", projectile.get_class())
 	muzzle.add_child(projectile)
 	var projectile_RID = projectile.get_rid()
 
@@ -50,3 +57,5 @@ func use_weapon(actor, target):
 
 
 
+func use_bullet():
+	return

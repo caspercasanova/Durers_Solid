@@ -1,12 +1,16 @@
-extends RigidBody3D
+extends Damage_Source.Bullet
 
 signal Hit_Successfull
 
-var Damage: int = 0
 
+# should probably do size instead of damage 
+var size: int = 0
+var type: Bullet_Types = Bullet_Types.STANDARD
+
+# logic for piercing another body? 
 func _on_body_entered(body):
 	if body.is_in_group("Target") && body.has_method("Hit_Successful"):
-		body.Hit_Successful(Damage)
+		body.Hit_Successful(size)
 		emit_signal("Hit_Successfull")
 
 #	queue_free()

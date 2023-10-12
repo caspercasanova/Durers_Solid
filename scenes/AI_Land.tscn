@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=3 uid="uid://bfukvueulw6yo"]
+[gd_scene load_steps=19 format=3 uid="uid://bfukvueulw6yo"]
 
 [ext_resource type="Material" uid="uid://cehjio2370tmg" path="res://addons/kenney_prototype_tools/materials/dark/material_03.tres" id="1_vv2o3"]
 [ext_resource type="Material" uid="uid://c4urka6ybrmhm" path="res://addons/kenney_prototype_tools/materials/dark/material_13.tres" id="2_1ixns"]
@@ -12,7 +12,6 @@
 [ext_resource type="PackedScene" uid="uid://ccon75qoooj3t" path="res://structures/portal/portal_navigator.tscn" id="10_qgrrr"]
 [ext_resource type="Material" uid="uid://xqry12c1frvm" path="res://addons/kenney_prototype_tools/materials/green/material_05.tres" id="10_t0b3g"]
 [ext_resource type="PackedScene" uid="uid://ct8ip3wfofxm1" path="res://structures/portal/portal.tscn" id="11_yoewi"]
-[ext_resource type="PackedScene" uid="uid://bk5fx6njiri84" path="res://fps_template_world/World/target.tscn" id="14_07hwm"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_nd1xr"]
 sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
@@ -177,7 +176,7 @@ debugging = true
 actor_node_path = NodePath("..")
 
 [node name="Camera3D" type="Camera3D" parent="dummymale"]
-transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -1, 2, -3)
+transform = Transform3D(-0.707107, 0, -0.707107, 0, 1, 0, 0.707107, 0, -0.707107, -11, 4, -3)
 
 [node name="MeshInstance3D" type="RigidBody3D" parent="." groups=["weapon"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.15198, 2, 34.1856)
@@ -188,5 +187,5 @@ mesh = SubResource("SphereMesh_0k1g4")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="MeshInstance3D"]
 shape = SubResource("SphereShape3D_buwgw")
 
-[node name="Target" parent="." instance=ExtResource("14_07hwm")]
-transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -22.986, 3.75, 40.8722)
+[node name="dummymale2" parent="." groups=["Target"] instance=ExtResource("8_h7xpf")]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -22, 3, 32)

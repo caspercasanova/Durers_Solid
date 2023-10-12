@@ -16,7 +16,7 @@
 
 [node name="dummy_ai" type="Node" node_paths=PackedStringArray("blackboard")]
 script = ExtResource("1_8dchw")
-blackboard = NodePath("@Node@17996")
+blackboard = NodePath("@Node@18339")
 custom_monitor = true
 
 [node name="SelectorComposite" type="Node" parent="."]

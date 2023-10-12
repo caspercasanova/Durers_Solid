@@ -15,6 +15,7 @@ class_name Dummy extends CharacterBody3D
 
 # Get the gravity from the project settings to be synced with RigidBody nodes.
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
+var ragdoll = preload("res://npcs/skull/skull.tscn")
 # base npc
 # https://github.com/ValveSoftware/source-sdk-2013/blob/0d8dceea4310fde5706b3ce1c70609d72a38efdf/sp/src/game/server/ai_basenpc.h#L2713
 
@@ -23,9 +24,9 @@ var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 # Import Health Resource 
 @export_category('Dummy Stats')
 @export var debugging = false 
+@export var jump_velocity: float = 4.5
 @export var movement_speed: float = 30
 @export var acceleration = 10;
-@export var jump_velocity: float = 4.5
 @export var max_health := 100
 #implement mechanics either sprint or shield for this
 @export var max_energy := 100
@@ -45,7 +46,8 @@ func distance_between_two_vectors_is_in_range(pos1: Vector3, pos2: Vector3, thre
 # should bake mesh and wait a second before loading to the map
 var navigation_is_synced = false 
 
-
+# they used a shared bitmap as a resource for both teams
+# https://github.com/Warzone2100/warzone2100/blob/master/src/ai.cpp
 
 # need to find this once a better model comes
 var radius = '902371-23712-37123-98173-1973-1298371-39-13871-39871-3981273'
@@ -158,7 +160,11 @@ var ignore_unseen_enemies: bool
 # thingsl ike defusing and medkits
 var random_button_sequences = null
 
+# make an LRU
+# add item, and delete when new item enters
 
+## AI / Structure / Sensor / Group  has range of me?
+## 
 
 """
 #####################  Cover Awareness
@@ -226,6 +232,7 @@ func find_cover():
 
 
 # Group Dynamics - Roles and Tactics
+# commander / captain / grunt
 var current_role: String = 'implement this type'
 
 
@@ -269,7 +276,7 @@ func actor_setup():
 	
 
 
-func _physics_process(_delta):
+func _physics_process(_delta: float) -> void:
 	# can eventually add the -y when flying 
 	# plus parachute action
 	return
@@ -303,7 +310,7 @@ func _on_velocity_computed(safe_velocity: Vector3):
 	move_and_slide()
 
 
-func move_to_target(delta) -> bool:
+func move_to_target(delta: float) -> bool:
 	if !navigation_is_synced:
 		return false
 		
@@ -331,6 +338,26 @@ func move_to_target(delta) -> bool:
 	return false
 
 
+func _on_body_collision_body_entered(body) -> void:
+	if(!navigation_is_synced):
+		return
+#	print("What class am I  ", self.get_class())
+#	print('Collision body entered my  ', self.get_instance_id(), '  body collision  ', body.get_instance_id())
+	
+	if (body is Damage_Source.Bullet):
+		print('Bullet Collided with body   ', body.size)
+	pass # Replace with function body.
+
+
+func _on_body_collision_body_exited(body: Node3D) -> void:
+	if(!navigation_is_synced):
+		return
+		
+		
+	pass # Replace with function body.
+
+
+
 func _on_area_of_operation_body_entered(body: Node3D) -> void:
 	if(!navigation_is_synced):
 		return	
@@ -354,7 +381,7 @@ func get_all_current_collisions():
 		print("I collided with ", collision.get_collider().name)
 
 
-func get_random_vector(xrange = 5.0, yrange = 5.0, zrange = 5.0) -> Vector3:
+func get_random_vector(xrange := 5.0, yrange := 5.0, zrange := 5.0) -> Vector3:
 	return Vector3(randf_range(-xrange, xrange), randf_range(-yrange, yrange), randf_range(-zrange, zrange))
 
 
@@ -362,16 +389,51 @@ func get_random_vector(xrange = 5.0, yrange = 5.0, zrange = 5.0) -> Vector3:
 """
 ##################### Will have more methods pertaining to current statuses
 """
-
-var current_health = max_health: set = set_health, get = get_health;
-func set_health(new_health):
+# can probably have current, max, and starting health 
+var current_health = max_health: set = set_current_health, get = get_current_health;
+func set_current_health(new_health):
 	current_health = new_health
-func get_health():
+func get_current_health():
 	return current_health
+
+func take_damage(damage_source: Damage_Source) ->void:
+	set_current_health(current_health - damage_source._damage)
 	
+	
+	if self.get_current_health() <= 0:
+		# let the attacker know they killed a unit :
+		damage_source._attacker.killed_unit(self)
+		print('Attacker does not have the method: "killed_unit"', damage_source._attacker)
+		die()
+		
+	react_to_damage()
+
+
+func react_to_damage():
+	pass
+
 
 func die() -> void:
+	"""
+	The AI is in the process of reworking, but I am still sticking with the State Machine structure as I did before. 
+	One of the few states of a Soldier is the Die state, which will spawn a ragdoll version of the Soldier, 
+	copy the current pose to the ragdoll, free the actual Soldier, and then start simulating the ragdoll physics.
+	
+	To make the last shot at the Soldier more dramatic, the Soldier will remember the last shot's information 
+	such as the hitbox, the direction, and the force magnitude of the hit, 
+	then after death, the hit force will be applied to the proper Physical Bone 
+	based on which hitbox was hit.
+	https://www.youtube.com/watch?v=IBRLNdnZh60
+	"""	
+	
 	queue_free()
+func spawn_ragdoll() -> void:
+	get_tree().get_root().add_child(ragdoll.instantiate())
+	return
+	
+func spawn_gibs():
+	pass 
+
 
 func is_alive():
 	return current_health > 0
@@ -388,22 +450,8 @@ func heavy_damage_taken():
 func critical_damage_taken():
 	return current_health <= max_health * 0.10
 
-func react_to_damage_taken():
-	pass
 
-# this will change 
-func take_damage(damage: float, attacker: Node) ->void:
-	current_health -= damage
-#	https://github.com/ValveSoftware/source-sdk-2013/blob/master/mp/src/game/server/baseentity.cpp#L1444
-	if current_health <= 0:
-		if attacker.has_method("killed_unit"):
-			attacker.killed_unit()
-		else: 
-			print('Attacker does not have the method: "killed_unit"', attacker)
-		die()
 
-func spawn_gibs():
-	pass 
 
 func should_retreat() -> bool:
 	# Define the conditions for retreating
@@ -445,6 +493,8 @@ func set_current_weapon(weapon: Node3D):
 func use_weapon():
 	# implements different weapon types
 	# Implemnets reload logic? 
+	# adds my info into the weapon
+	# checks for primary / secondary checks?
 	pass
 
 
@@ -467,9 +517,10 @@ func set_is_reloading(_is_reloading):
 	is_reloading = _is_reloading
 func get_is_reloading():
 	return is_reloading
+
 func reload_weapon():
 	set_is_reloading(true)
-	print('Is Reloading')
+#	print('Is Reloading')
 	call_delayed(func(): 
 		set_is_reloading(false) 
 		set_current_ammo(10), 
@@ -485,7 +536,6 @@ func should_reload_weapon():
 	# use a hueristic for #of enemies nearby and
 	return false
 
-
 func number_of_items_in_ao(group):
 	return group_in_area[group].size()
 
@@ -493,6 +543,7 @@ func pick_up_item(item: Node3D):
 	# get type of item
 	# weapon / item and useMethod	
 	return
+	
 # depricate this
 func pick_up_weapon(weapon: Node3D):
 	weapon_parent.add_child(weapon)
@@ -521,8 +572,6 @@ $$$$$$$$$$$$$$$ ATTACK METHODS
 ###############
 
 """
-
-
 # this is a value derived by the weapon being held
 # no weapon = 1 meter range for melee
 # make getter + setter and set range on drop and pickup and weapon switch 
@@ -538,6 +587,32 @@ func set_current_target(_target_node: Node):
 	current_target = _target_node
 func get_current_target():
 	return current_target 
+
+
+# should be simply firing current weapon and nothing more
+func attack_target(_target: Node3D = null) -> void:
+	var target = _target
+	if !_target: 
+		target = find_nearest_node_in_group("Target")
+	
+	if is_reloading:
+		return
+	"""
+	if is_reloading && is_target_in_melee_range()
+		stop reload animation
+		grab secondary 
+		or punch 
+	"""
+	if(!is_reloading && current_ammo <= 0):
+		reload_weapon()
+		return
+	
+#	print('curr ammo  ', current_ammo, ' is_reloading   ',is_reloading)
+	aim_gun_towards_target(target.global_position)
+	get_current_weapon().use_weapon(self, target)
+	
+
+
 
 
 # dont like this function, should be AO instead of entire tree
@@ -556,32 +631,16 @@ func find_nearest_node_in_group(target_type: String, max_distance: float = 99999
 				nearest_node = node
 				
 	# Check if a nearest node was found
-	if nearest_node:
-		print("Nearest node of type ", target_type, " is: ", nearest_node)
-	else:
-		print("No node of type ", target_type, " found.")
+	if !debugging:
+		if nearest_node:
+			print("Nearest node of type ", target_type, " is: ", nearest_node)
+		else:
+			print("No node of type ", target_type, " found.")
 		
 	return nearest_node
 
-
-# should be simply firing current weapon and nothing more
-func attack_target(_target: Node3D = null) -> void:
-	var target = _target
-	if !_target: 
-		target = find_nearest_node_in_group("Target")
-	
-	if is_reloading:
-		return
-	if(!is_reloading && current_ammo <= 0):
-		reload_weapon()
-		return
-	
-	print('curr ammo  ',current_ammo, 'is_reloading   ',is_reloading)
-	rotate_gun_towards_target_position(target.global_position)
-	get_current_weapon().use_weapon(self, target.global_position)
-	
-
-func rotate_gun_towards_target_position(target: Vector3):
+# this doenst work as I think
+func aim_gun_towards_target(target: Vector3):
 	get_current_weapon().look_at(target)
 
 
@@ -721,7 +780,42 @@ const DOT_45_DEGREE = 0.707106781187
 
 
 
+
+
 """
+AI Targeting system for that OS strategy game
+# Calculates attack priority for a certain target
+# Sensors/ecm droids, non-military structures get lower priority
+# Get attacker weapon effect
+# check if this droid is assigned to a commander
+# find out if the current target is targeting our commander
+# check if this droid is assigned to a commander
+# find out if the current target is targeting our commander
+# Get weapon effect
+# See if attacker is using an EMP weapon
+# Calculate attack weight
+# Calculate damage this target suffered
+# FIXME Somewhere we get 0HP droids from
+# See if this type of a droid should be prioritized
+# Now calculate the overall weight
+# If attacking with EMP, try to avoid targets that were already "EMPed"
+# Now calculate the overall weight
+# Go for unfinished structures only if nothing else is found (same for non-visible structures)
+# EMP should only attack structures if no enemy droids are around
+# We prefer objects we can see and can attack immediately
+# If the object is too close to fire at, consider it to be at maximum range.
+# Penalty for units that are already considered doomed (but the missile might miss!)
+# Commander-related criterias
+# attached to a commander and don't have a target assigned by some order
+# if commander is being targeted by our target, try to defend the commander
+# fire support - go through all droids assigned to the commander
+
+
+
+
+
+
+
 
 FLOT - Forward Line of Own Troops: This is an imaginary line that represents the most forward positions of friendly forces on the battlefield.
 
@@ -1065,9 +1159,6 @@ func sabotage_complete() -> bool:
 
 
 """
-
-
-
 
 
 
