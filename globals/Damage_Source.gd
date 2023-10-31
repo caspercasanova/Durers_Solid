@@ -18,67 +18,72 @@ class_name Damage_Source
 # For hitscan weapons, it'll be the same as the inflictor. For projectile weapons, the projectile 
 # is the inflictor, and this contains the weapon that created the projectile.
 # Attacker is the character who originated the attack (like a player or an AI).
-var inflictor : Object = null: set = set_inflictor, get = get_inflictor
-var weapon : Weapon_Types = 0: set = set_weapon, get = get_weapon
+var inflictor : Object = null 
+var weapon : Weapon_Types = 0
 # damage_source_stat might be a better option to cover here?
-var attacker : Object = null: set = set_attacker, get = get_attacker
-var damage : float = 0.0: set = set_damage, get = get_damage
-var base_damage : float = 0.0: set = set_base_damage, get = get_base_damage
-var max_damage : float = 0.0: set = set_max_damage, get = get_max_damage
-var damage_bonus : float = 0.0: set = set_damage_bonus, get = get_damage_bonus
-var damage_force : Vector3 = Vector3(0, 0, 0): set = set_damage_force, get = get_damage_force
-var damage_position : Vector3 = Vector3(0, 0, 0): set = set_damage_position, get = get_damage_position
-var damage_type : Damage_Types = 0: set = set_damage_type, get = get_damage_type
-var damage_custom : int = 0: set = set_damage_custom, get = get_damage_custom
+var attacker : Object = null
+var damage : float = 0.0
+var base_damage : float = 0.0
+var max_damage : float = 0.0
+var damage_bonus : float = 0.0
+var damage_force : Vector3 = Vector3(0, 0, 0)
+var damage_position : Vector3 = Vector3(0, 0, 0)
+var damage_type : Damage_Types = 0
+var damage_custom : int = 0
 # interesting?
-var damage_stats : int = 0: set = set_damage_stats, get = get_damage_stats
+var damage_stats : int = 0
 # probably dont need this, ammos themselves update the damage? but maybe needed for the size of the object?
-var ammo_type : AmmoType = null: set = set_ammo_type, get = get_ammo_type
-var player_penetration_count : int = 0: set = set_player_penetration_count, get = get_player_penetration_count
-var damaged_other_players : int = 0: set = set_damaged_other_players, get = get_damaged_other_players
-var reported_position : Vector3 = Vector3(0, 0, 0): set = set_reported_position, get = get_reported_position
-var force_friendly_fire : bool = false: set = set_force_friendly_fire, get = get_force_friendly_fire
-
+var ammo_type : AmmoType = null
+var player_penetration_count : int = 0
+var damaged_other_players : int = 0
+var reported_position : Vector3 = Vector3(0, 0, 0)
+var force_friendly_fire : bool = false
 var phys_pushscale = 1
 var mass: int = 0;
-var size: int = 0;
 
 
 func _init(
-#	_inflictor = null,
-#	_attacker = null,
-#	_damage = 0.0,
-#	_baseDamage = 0.0,
-#	_maxDamage = 0.0,
-#	_damageBonus = 0.0,
-#	_damageForce ,
-#	_damagePosition,
-#	_damageType,
-#	_damageCustom,
-#	_damageStats,
-#	_ammoType,
-#	_playerPenetrationCount,
-#	_damagedOtherPlayers,
-#	_reportedPosition,
-#	_forceFriendlyFire,
-#	_phys_pushscale,
-#	_mass,
+	_inflictor: Object = null,
+	_weapon: Weapon_Types = 0,
+	_attacker: Object = null,
+	_damage: float = 0.0,
+	_base_damage: float = 0.0,
+	_max_damage: float = 0.0,
+	_damage_bonus: float = 0.0,
+	_damage_force: Vector3 = Vector3(0, 0, 0),
+	_damage_position: Vector3 = Vector3(0, 0, 0),
+	_damage_type: Damage_Types = Damage_Types.GENERIC,
+	_damage_custom : int= 0,
+	_damage_stats: int = 0,
+	_ammo_type: AmmoType = null,
+	_player_penetration_count: int = 0 ,
+	_damaged_other_players: int = 0,
+	_reported_position: Vector3 = Vector3(0,0,0),
+	_force_friendly_fire: bool = false,
+	_phys_pushscale: int = 1,
+	_mass: int = 0,
 ) -> void:
+	inflictor = _inflictor
+	weapon = _weapon
+	attacker = _attacker
+	damage = _damage
+	base_damage = _base_damage
+	max_damage = _max_damage
+	damage_bonus = _damage_bonus
+	damage_force = _damage_force
+	damage_position = _damage_position
+	damage_type = _damage_type
+	damage_custom = _damage_custom
+	damage_stats = _damage_stats
+	ammo_type = _ammo_type
+	player_penetration_count = _player_penetration_count
+	damaged_other_players = _damaged_other_players
+	reported_position = _reported_position
+	force_friendly_fire = _force_friendly_fire
+	phys_pushscale = _phys_pushscale
+	mass = _mass
 	return
 
-
-#can change this to a getter for impulse scale variable
-static func calc_impulse_scale(target_mass: float, desired_speed: float) -> float:
-	return target_mass * desired_speed
-
-
-static func calc_damage_force(size: Vector3, damage: float = 1) -> float:
-	var force = damage * (32 * 32 * 72.0) / (size.x * size.y * size.z) * 5
-	
-	if force > 1000.0:
-		force = 1000.0
-
-	return force
 
 
 #print("Inflictor: ", p_inflictor)
@@ -144,9 +149,15 @@ static func calc_damage_force(size: Vector3, damage: float = 1) -> float:
 
 
 # possibly move these to the character instead
-func fromBullet(bullet: Bullet, vec_bullet_dir: Vector3, vec_force_origin: Vector3, fl_scale: float = 1.0) -> Damage_Source:
+static func fromBullet(bullet: Damage_Source.Bullet, vec_bullet_dir: Vector3, vec_force_origin: Vector3, fl_scale: float = 1.0) -> Damage_Source:
+	# we shouldnt instiate a new bullet i dont think. 
+	var dmg_src = Damage_Source.new()
 	
-	return Damage_Source.new()
+	# data mutation but its fine
+	calculate_bullet_damage_force(dmg_src, bullet, vec_force_origin, vec_force_origin, fl_scale)
+	
+	
+	return dmg_src
 
 static func fromMelee() -> Damage_Source:
 	return Damage_Source.new()
@@ -154,7 +165,7 @@ static func fromMelee() -> Damage_Source:
 static func fromProjectileWeapon() -> Damage_Source:
 	return Damage_Source.new()
 
-static func fromRocket() -> Damage_Source:
+static func fromBlast() -> Damage_Source:
 	return Damage_Source.new()
 
 static func fromRayCastWeapon() -> Damage_Source:
@@ -179,18 +190,58 @@ func react_to_damage(damage_source: Damage_Source):
 
 class Bullet extends RigidBody3D:
 	var bullet_type: Bullet_Types = Bullet_Types.STANDARD
+	var projectile_weapon: Projectile_Weapons = Projectile_Weapons.SEMI_AUTO_SECONDARY
+	var size: Vector3
+	var origin: Vector3
+	var attacker: Object
 #	func _init(_bullet_type):
 #		bullet_type = _bullet_type
 #		pass
+	# return ammo sizes for all projectile weapons
+	func get_projectile_weapon_defs(projectile_weapon: Projectile_Weapons) -> Vector3:
+		match projectile_weapon:
+			Projectile_Weapons.SEMI_AUTO_SECONDARY:
+				return Vector3(1, 1, 1)
+			Projectile_Weapons.AUTO_SECONDARY:
+				return Vector3(2, 2, 2)
+			Projectile_Weapons.AR:
+				return Vector3(3, 3, 3)
+			Projectile_Weapons.SMG:
+				return Vector3(4, 4, 4)
+			Projectile_Weapons.LMG:
+				return Vector3(5, 5, 5)
+			Projectile_Weapons.MMG:
+				return Vector3(6, 6, 6)
+			Projectile_Weapons.HMG:
+				return Vector3(7, 7, 7)
+			Projectile_Weapons.SHOTGUN:
+				return Vector3(8, 8, 8)
+			Projectile_Weapons.SNIPER:
+				return Vector3(9, 9, 9)
+			Projectile_Weapons.BAZOOKA:
+				return Vector3(10, 10, 10)
+			Projectile_Weapons.MINIGUN:
+				return Vector3(11, 11, 11)
+			Projectile_Weapons.CANNON:
+				return Vector3(12, 12, 12)
+			Projectile_Weapons.MORTAR:
+				return Vector3(13, 13, 13)
+			_:
+				return Vector3(0, 0, 0)
 
+
+
+class Blast extends Area3D:
+	var size: Vector3
+	var origin: Vector3
+	var attacker: Object
+	var explosive_device: Explosive_Devices = Explosive_Devices.SMOKE_GRENADE
 
 class Rocket:
 	var rocket_type: Rocket_Types = Rocket_Types.STANDARD
 
-class Explosive_Device:
-	var explosive_device: Explosive_Devices = Explosive_Devices.SMOKE_GRENADE
 
-class Projectile_Weapon:
+class Projectile_Weapon extends RigidBody3D: 
 	var projectile_weapon: Projectile_Weapons = Projectile_Weapons.SEMI_AUTO_SECONDARY
 	
 class Physics_Weapon:
@@ -208,7 +259,8 @@ enum Weapon_Types {
 	Phyics_Weapons,     # physics weap -> trail effect
 	Ray_Cast_Weapons,   # raycast -> different ray types
 	Melee_Weapons,      # melee -> raw damage 
-	none = -1           # debugging?
+	none = -1,          # idk the use yet?
+	debug = -2          # debuggin
 }
 
 
@@ -263,7 +315,9 @@ enum Equipment {
 	ARMOR_KIT,
 	AMMO_POUCH, 
 	RANGE_FINDER,
-	LAPTOP
+	LAPTOP,
+	FLASHLIGHT,
+	EXOSKELETON, # would be dope
 }
 
 enum Melee_Weapons {
@@ -291,6 +345,7 @@ enum Physics_Weapons {
 	ELECTRO_CURVE_GUN,
 	GRAVITY_GUN,
 	FREEZE_GUN,
+	HEALTH_THROWER,
 }
 
 # BRO TRACERS THAT SPAWN ITEMS???? SHEESH
@@ -311,8 +366,8 @@ enum Projectile_Weapons {
 	AUTO_SECONDARY,
 	AR,
 	SMG,
-	MMG,
 	LMG,
+	MMG,
 	HMG,
 	SHOTGUN,
 	SNIPER,
@@ -322,34 +377,18 @@ enum Projectile_Weapons {
 	MORTAR,
 }
 
-enum Project_Weapons_Damage {
-	SEMI_AUTO_SECONDARY = 1,
-	AUTO_SECONDARY,
-	AR,
-	SMG,
-	MMG,
-	LMG,
-	HMG,
-	SHOTGUN,
-	SNIPER,
-	BAZOOKA,
-	MINIGUN,  
-	CANNON,
-	MORTAR,	
-}
-
-
 
 # use for more of the gun resources 
 enum Bullet_Types {
-	STANDARD, # white
+	STANDARD, # white fastest 
 	ARMOR_PIERCING, # red less ammo + slower rate of fire think bolter now 
 	EXPLOSIVE, # orange,
-	ELECTRO, # electricblue
-	FREEZING, # cyan
-	ACID, # green
+	ELECTRO, # electricblue stun
+	FREEZING, # cyan slows movement
+	ACID, # green melts environment 
 	HOMING, # purple halo
 	CHAOS, # black
+	PHOSPHORUS, # dred breaks apart and does crazy spread damage  
 }
 
 var Bullet_Colors: Dictionary = {
@@ -397,6 +436,143 @@ enum Explosive_Devices {
 
 
 
+
+
+
+# Note: Returns the ammo name, 
+# or the classname of the object, 
+# or the model name in the case of physgun ammo.
+func get_projectile_type(projectile_name: String = "Unknown") -> String:
+
+	if Bullet_Types[projectile_name] :
+		# Get the ammo name from the ammo definition
+		return projectile_name
+	
+	if inflictor != null:
+		# Get the classname of the inflictor
+		projectile_name = inflictor.get_classname()
+		
+		# Check for physgun ammo (assuming "prop_physics" as the class name)
+		if projectile_name == "prop_physics":
+			projectile_name = str(inflictor.get_model_name())
+	
+	return projectile_name
+
+
+#can change this to a getter for impulse scale variable
+static func calc_impulse_scale(target_mass: float, desired_speed: float) -> float:
+	return target_mass * desired_speed
+
+
+static func calc_damage_force(size: Vector3, damage: float = 1) -> float:
+	var force = damage * (32 * 32 * 72.0) / (size.x * size.y * size.z) * 5
+	print('Damage Force:  ', force)
+	if force > 1000.0:
+		force = 1000.0
+
+	return force
+
+
+
+func calculate_explosive_damage_force(dmg_src: Damage_Source, vec_dir: Vector3, vec_force_origin: Vector3, fl_scale: float = 1.0):
+	
+	# Set the damage position in the info object
+	dmg_src.damage_position = vec_force_origin
+	
+	# Constants
+	var clamp_force = calc_impulse_scale(75, 400)
+	
+	# Calculate an impulse large enough to push a 75kg object 4 in/sec per point of damage
+	var force_scale = dmg_src.base_damage * calc_impulse_scale(75, 4)
+	
+	# Clamp the force if it exceeds the clamping force
+	if force_scale > clamp_force:
+		force_scale = clamp_force
+	
+	# Fudge blast forces to introduce variability
+	force_scale *= randf_range(0.85, 1.15)
+
+	# Calculate the force vector
+	var vec_force = vec_dir.normalized() * force_scale * phys_pushscale
+
+	# Apply the final scaling factor
+	vec_force *= fl_scale
+
+	# Set the damage force in the info object
+	dmg_src.damage_force = vec_force
+	pass
+
+
+
+# -----------------------------------------------------------------------------
+#  Purpose: Fill out a takedamageinfo with a damage force for a bullet impact
+# -----------------------------------------------------------------------------
+static func calculate_bullet_damage_force(damage_source: Damage_Source, bullet: Bullet, vec_bullet_dir: Vector3, vec_force_origin: Vector3, fl_scale: float = 1.0) -> Damage_Source:
+#	if(debugging):
+#		print('Vectors direcion & Force origin', vec_bullet_dir, vec_force_origin)
+	
+	damage_source.damage_type = Damage_Types.BULLET
+	damage_source.attacker = bullet.attacker
+	damage_source.damage = 1000
+	# << ======    ammo type is an enum? 
+	damage_source.damage_position = vec_force_origin
+	
+	# Calculate the force vector
+	var vec_force = vec_bullet_dir.normalized() * calc_damage_force(Vector3(1,1,1)) # could add bullet damage as a param here
+	
+	# Apply scaling factors
+	vec_force *= damage_source.phys_pushscale
+	vec_force *= fl_scale
+	
+	# Set the damage force in the info object
+	damage_source.damage_force = vec_force
+	
+	assert(vec_force != Vector3(0, 0, 0), 'Assert that the force vector is not equal to vec3_origin')
+
+	return damage_source
+	
+
+
+
+	
+func calculate_melee_damage_force(dmg_src: Damage_Source, vec_melee_dir: Vector3, vec_force_origin: Vector3, fl_scale: float = 1.0):
+	# Set the damage position in the info object
+	dmg_src.set_damage_position(vec_force_origin)
+
+	# Calculate an impulse large enough to push a 75kg man 4 in/sec per point of damage
+	var fl_force_scale = dmg_src.get_base_damage() * calc_impulse_scale(75, 4)	
+
+	# Calculate the force vector
+	var vec_force = vec_melee_dir.normalized() * fl_force_scale	
+
+	# Apply scaling factors
+	vec_force *= phys_pushscale
+	vec_force *= fl_scale	
+
+	# Set the damage force in the info object
+	dmg_src.set_damage_force(vec_force)
+
+func guess_damage_force(info: Damage_Source, vec_force_dir: Vector3, vec_force_origin: Vector3, fl_scale: float = 1.0):
+	# Implement the logic for GuessDamageForce here
+	# You can access info, vec_force_dir, vec_force_origin, and fl_scale as parameters
+	# and modify them as needed within this function
+	
+	var damage_type = info.get_damage_type()
+	
+	if damage_type.DMG_BULLET:
+		calculate_bullet_damage_force(info, Bullet.new(), vec_force_dir, vec_force_origin, fl_scale)
+	elif damage_type.DMG_BLAST:
+		calculate_explosive_damage_force(info, vec_force_dir, vec_force_origin, fl_scale)
+	else:
+		calculate_melee_damage_force(info, vec_force_dir, vec_force_origin, fl_scale)
+
+
+
+
+
+
+
+# ammo isnt bullet info entirely
 enum AMMO_FLAGS  {
 	INFINITE_AMMO,
 	AMMO_FORCE_DROP_IF_CARRIED,
@@ -444,295 +620,11 @@ class AmmoType:
 
 
 
+	# 175 AI_Lands
+	# [node name="dummy_ai" parent="dummymale" instance=ExtResource("9_8xtbk")]
+	# actor_node_path = NodePath("..")
 
-
-class WeaponType:
-	var weapon_type: Weapon_Types = 0
-
-# return ammo sizes for all projectile weapons
-func get_projectile_weapon_defs(projectile_weapon: Projectile_Weapons) -> Vector3:
-	match projectile_weapon:
-		Projectile_Weapons.SEMI_AUTO_SECONDARY:
-			return Vector3(1, 1, 1)
-		Projectile_Weapons.AUTO_SECONDARY:
-			return Vector3(2, 2, 2)
-		Projectile_Weapons.AR:
-			return Vector3(3, 3, 3)
-		Projectile_Weapons.SMG:
-			return Vector3(4, 4, 4)
-		Projectile_Weapons.LMG:
-			return Vector3(5, 5, 5)
-		Projectile_Weapons.MMG:
-			return Vector3(6, 6, 6)
-		Projectile_Weapons.HMG:
-			return Vector3(7, 7, 7)
-		Projectile_Weapons.SHOTGUN:
-			return Vector3(8, 8, 8)
-		Projectile_Weapons.SNIPER:
-			return Vector3(9, 9, 9)
-		Projectile_Weapons.BAZOOKA:
-			return Vector3(10, 10, 10)
-		Projectile_Weapons.MINIGUN:
-			return Vector3(11, 11, 11)
-		Projectile_Weapons.CANNON:
-			return Vector3(12, 12, 12)
-		Projectile_Weapons.MORTAR:
-			return Vector3(13, 13, 13)
-		_:
-			return Vector3(0, 0, 0)
-
-
-
-
-# Function to get the name of the ammo that caused damage
-# Note: Returns the ammo name, or the classname of the object, or the model name in the case of physgun ammo.
-func get_projectile_type(projectile_name: String = "Unknown") -> String:
-
-	if Bullet_Types[projectile_name] :
-		# Get the ammo name from the ammo definition
-		return projectile_name
+	# [node name="dummy_ai" parent="dummymale" node_paths=PackedStringArray("blackboard") instance=ExtResource("9_8xtbk")]
+	# actor_node_path = NodePath("..")
+	# blackboard = NodePath("@Node@18404")
 	
-	if inflictor != null:
-		# Get the classname of the inflictor
-		projectile_name = inflictor.get_classname()
-		
-		# Check for physgun ammo (assuming "prop_physics" as the class name)
-		if projectile_name == "prop_physics":
-			projectile_name = str(inflictor.get_model_name())
-	
-	return projectile_name
-
-
-
-
-
-
-func calculate_explosive_damage_force(dmg_src: Damage_Source, vec_dir: Vector3, vec_force_origin: Vector3, fl_scale: float = 1.0):
-	
-	# Set the damage position in the info object
-	dmg_src.set_damage_position(vec_force_origin)
-	
-	# Constants
-	var clamp_force = calc_impulse_scale(75, 400)
-	
-	# Calculate an impulse large enough to push a 75kg object 4 in/sec per point of damage
-	var force_scale = dmg_src.get_base_damage() * calc_impulse_scale(75, 4)
-	
-	# Clamp the force if it exceeds the clamping force
-	if force_scale > clamp_force:
-		force_scale = clamp_force
-	
-	# Fudge blast forces to introduce variability
-	force_scale *= randf_range(0.85, 1.15)
-
-	# Calculate the force vector
-	var vec_force = vec_dir.normalized() * force_scale * phys_pushscale
-
-	# Apply the final scaling factor
-	vec_force *= fl_scale
-
-	# Set the damage force in the info object
-	dmg_src.set_damage_force(vec_force)
-	pass
-
-
-func calculate_bullet_damage_force(dmg_src: Damage_Source, Bullet_Types, vec_bullet_dir: Vector3, vec_force_origin: Vector3, fl_scale: float = 1.0) -> Damage_Source:
-	var bullet = Damage_Source.new()
-	# ammo type is an enum? 
-
-	bullet.set_damage_position(vec_force_origin)
-	
-	# Calculate the force vector
-	var vec_force = vec_bullet_dir.normalized() * calc_damage_force(Vector3(1,1,1))
-	
-	# Apply scaling factors
-	vec_force *= phys_pushscale
-	vec_force *= fl_scale
-	
-	# Set the damage force in the info object
-	bullet.set_damage_force(vec_force)
-	
-	# Assert that the force vector is not equal to vec3_origin
-	assert(vec_force != Vector3(0, 0, 0))
-
-	return Damage_Source.new()
-
-
-	
-func calculate_melee_damage_force(dmg_src: Damage_Source, vec_melee_dir: Vector3, vec_force_origin: Vector3, fl_scale: float = 1.0):
-	# Set the damage position in the info object
-	dmg_src.set_damage_position(vec_force_origin)	
-
-	# Calculate an impulse large enough to push a 75kg object 4 in/sec per point of damage
-	var fl_force_scale = dmg_src.get_base_damage() * calc_impulse_scale(75, 4)	
-
-	# Calculate the force vector
-	var vec_force = vec_melee_dir.normalized() * fl_force_scale	
-
-	# Apply scaling factors
-	vec_force *= phys_pushscale
-	vec_force *= fl_scale	
-
-	# Set the damage force in the info object
-	dmg_src.set_damage_force(vec_force)
-
-func guess_damage_force(info: Damage_Source, vec_force_dir: Vector3, vec_force_origin: Vector3, fl_scale: float = 1.0):
-	# Implement the logic for GuessDamageForce here
-	# You can access info, vec_force_dir, vec_force_origin, and fl_scale as parameters
-	# and modify them as needed within this function
-	
-	var damage_type = info.get_damage_type()
-	
-	if damage_type.DMG_BULLET:
-		calculate_bullet_damage_force(info, get_projectile_weapon_defs(Projectile_Weapons.AR), vec_force_dir, vec_force_origin, fl_scale)
-	elif damage_type.DMG_BLAST:
-		calculate_explosive_damage_force(info, vec_force_dir, vec_force_origin, fl_scale)
-	else:
-		calculate_melee_damage_force(info, vec_force_dir, vec_force_origin, fl_scale)
-
-
-
-
-
-
-
-# Setter for inflictor
-func set_inflictor(_inflictor):
-	inflictor = _inflictor
-
-# Getter for inflictor
-func get_inflictor():
-	return inflictor
-
-# Setter for weapon
-func set_weapon(_weapon):
-	weapon = _weapon
-
-# Getter for weapon
-func get_weapon():
-	return weapon
-
-# Setter for attacker
-func set_attacker(_value: Object) -> void:
-	attacker = _value
-
-# Getter for attacker
-func get_attacker() -> Object:
-	return attacker
-
-# Setter for damage
-func set_damage(value: float) -> void:
-	damage = value
-
-# Getter for damage
-func get_damage() -> float:
-	return damage
-
-# Setter for maxDamage
-func set_max_damage(value: float) -> void:
-	max_damage = value
-
-# Getter for maxDamage
-func get_max_damage() -> float:
-	return max_damage
-
-# Setter for damageBonus
-func set_damage_bonus(value: float) -> void:
-	damage_bonus = value
-
-# Getter for damageBonus
-func get_damage_bonus() -> float:
-	return damage_bonus
-
-# Setter for baseDamage
-func set_base_damage(value: float) -> void:
-	base_damage = value
-
-# Getter for baseDamage
-func get_base_damage() -> float:
-	return base_damage
-
-# Setter for damageForce
-func set_damage_force(value: Vector3) -> void:
-	damage_force = value
-
-# Getter for damageForce
-func get_damage_force() -> Vector3:
-	return damage_force
-
-# Setter for damagePosition
-func set_damage_position(value: Vector3) -> void:
-	damage_position = value
-
-# Getter for damagePosition
-func get_damage_position() -> Vector3:
-	return damage_position
-
-# Setter for reportedPosition
-func set_reported_position(value: Vector3) -> void:
-	reported_position = value
-
-# Getter for reportedPosition
-func get_reported_position() -> Vector3:
-	return reported_position
-
-# Setter for damageType
-func set_damage_type(value: int) -> void:
-	damage_type = value
-
-# Getter for damageType
-func get_damage_type() -> int:
-	return damage_type
-
-# Setter for damageCustom
-func set_damage_custom(value: int) -> void:
-	damage_custom = value
-
-# Getter for damageCustom
-func get_damage_custom() -> int:
-	return damage_custom
-
-# Setter for damageStats
-func set_damage_stats(value: int) -> void:
-	damage_stats = value
-
-# Getter for damageStats
-func get_damage_stats() -> int:
-	return damage_stats
-
-# Setter for ammoType
-func set_ammo_type(_ammo_type: AmmoType):
-	ammo_type = _ammo_type
-
-# Getter for ammoType
-func get_ammo_type():
-	return ammo_type
-
-# Setter for playerPenetrationCount
-func set_player_penetration_count(_player_penetration_count):
-	player_penetration_count = _player_penetration_count
-
-# Getter for playerPenetrationCount
-func get_player_penetration_count():
-	return player_penetration_count
-
-# Setter for damagedOtherPlayers
-func set_damaged_other_players(_damaged_other_players):
-	damaged_other_players = _damaged_other_players
-
-# Getter for damagedOtherPlayers
-func get_damaged_other_players():
-	return damaged_other_players
-
-# Setter for forceFriendlyFire
-func set_force_friendly_fire(_force_friendly_fire):
-	force_friendly_fire = _force_friendly_fire
-
-# Getter for forceFriendlyFire
-func get_force_friendly_fire():
-	return force_friendly_fire
-
-
-
-
-

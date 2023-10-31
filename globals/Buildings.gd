@@ -4,16 +4,27 @@ extends Node
 enum Buildings {
 	Radar, 
 	Spotlight, 
-	Turret, 
+	Turret, # Missle Defense, Anti Infantry, Anti Vehicle, Healing 
 	Helipad, 
 	Assembly_Area, 
 	Command_Center,
 }
 
 
-enum PointsOfInterest {
+enum Points_Of_Interest {
 	Cover_High,
+	Batteries,
 	Cover_Medium,
 	Landing_Zone, 
-	Outpost_Flag
+	Outpost_Flag # ? think of a cooler thing than a flag 
+}
+
+
+enum Environment_Objs {
+	Computer,
+	Keyboard, # shoot the caps off 
+	Phone,
+	Radio,
+	BeatPad,
+	Lavalamp 
 }

@@ -1,4 +1,4 @@
-extends RigidBody3D
+extends Damage_Source.Projectile_Weapon
 
 @export var _weapon_name: String = 'blaster_a'
 @export var _current_ammo: int = 10
@@ -8,7 +8,7 @@ extends RigidBody3D
 @onready var timer: Timer = $timer
 @onready var muzzle: Marker3D = $muzzle
 
-var fire_rate_per_second = 1
+var fire_rate_per_second = 100
 var bullet = preload("res://weapons/bullet.tscn")
 var projectile_velocity: int = 50
 var pick_up_ready: bool = false
@@ -44,7 +44,9 @@ func use_weapon(actor: Dummy, target: Node):
 
 	var direction = -muzzle.global_transform.basis.z
 	var projectile = bullet.instantiate()
-	projectile.size = 1
+	projectile.bullet_type = Bullet_Types.EXPLOSIVE
+	projectile.size =  projectile.get_projectile_weapon_defs(Projectile_Weapons.SEMI_AUTO_SECONDARY)
+	projectile.attacker = actor
 	print("proctile class  ", projectile.get_class())
 	muzzle.add_child(projectile)
 	var projectile_RID = projectile.get_rid()
@@ -56,6 +58,6 @@ func use_weapon(actor: Dummy, target: Node):
 	call_delayed(func(): set_can_attack(true), fire_rate_per_second)
 
 
-
+# makes a bullet from the bullet class 
 func use_bullet():
 	return

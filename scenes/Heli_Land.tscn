@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3 uid="uid://dixy31aphiefk"]
+[gd_scene load_steps=16 format=3 uid="uid://dixy31aphiefk"]
 
 [ext_resource type="Script" path="res://scenes/Helicopter.gd" id="1_g2kku"]
 [ext_resource type="Material" uid="uid://b7kc8jfs4fowj" path="res://addons/kenney_prototype_tools/materials/green/material_02.tres" id="2_65wmq"]
@@ -29,6 +29,9 @@ emission = Color(1, 0.4, 0.694118, 1)
 [sub_resource type="SphereMesh" id="SphereMesh_gidir"]
 material = SubResource("StandardMaterial3D_iq2mg")
 
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_2ny0l"]
+points = PackedVector3Array(-1, 2, 0, -0.707126, 2, -0.707126, -0.900157, 1.19969, 0, -0.707126, 2, 0.70693, 0, 2, -1, 0, 1.19969, -0.900157, -0.636453, 1.19969, -0.636453, -0.636453, 1.19969, 0.636257, -0.424432, -1.20008, -0.424432, -0.5, -2, 0, -0.424432, -1.20008, 0.424237, 0, 2, 1, 0.70693, 2, -0.707126, 0.636257, 1.19969, -0.636453, 0.424237, -1.20008, -0.424432, 0, -2, -0.5, -0.353563, -2, -0.353563, -0.353563, -2, 0.353367, 0, -2, 0.5, 0.636257, 1.19969, 0.636257, 0.70693, 2, 0.70693, 0.424237, -1.20008, 0.424237, 1, 2, 0, 0.5, -2, 0, 0.353367, -2, -0.353563, 0.353367, -2, 0.353367)
+
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_71wet"]
 next_pass = ExtResource("3_24r61")
 
@@ -49,7 +52,10 @@ environment = SubResource("Environment_u1851")
 transform = Transform3D(-0.866023, -0.433016, 0.250001, 0, 0.499998, 0.866027, -0.500003, 0.749999, -0.43301, 0, 0, 0)
 shadow_enabled = true
 
-[node name="Helicopter" type="CharacterBody3D" parent="."]
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, -51, 3, 0)
+
+[node name="Helicopter" type="RigidBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -46, 2, 0)
 script = ExtResource("1_g2kku")
 
@@ -60,12 +66,13 @@ shape = SubResource("SphereShape3D_wkqdn")
 mesh = SubResource("SphereMesh_gidir")
 skeleton = NodePath("../..")
 
-[node name="Camera3D" type="Camera3D" parent="Helicopter"]
-transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, -5, 1, 0)
-
 [node name="laser" parent="Helicopter" instance=ExtResource("2_jgc71")]
 unique_name_in_owner = true
 transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 1, 0, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Helicopter"]
+transform = Transform3D(1.31134e-07, 1, 0, -1, 1.31134e-07, 0, 0, 0, 1, 3.1, 0, 0)
+shape = SubResource("ConvexPolygonShape3D_2ny0l")
 
 [node name="CSGCombiner3D" type="CSGCombiner3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, 0)

@@ -1,19 +1,39 @@
 extends Damage_Source.Bullet
 
-signal Hit_Successfull
+var blast = preload("res://weapons/blast.tscn")
+
+#signal Hit_Successfull
+
+#shielf with impact
+#https://godotshaders.com/shader/shield-with-impact-visualisation/
+func _ready():
+	pass
 
 
-# should probably do size instead of damage 
-var size: int = 0
-var type: Bullet_Types = Bullet_Types.STANDARD
+func call_delayed(callable: Callable, delay: float):
+	get_tree().create_timer(delay, false).connect('timeout', callable)
+
+
+func instantiate_an_explosion():
+	print('EXPLODED')
+	var b = blast.instantiate()
+
+	return b
 
 # logic for piercing another body? 
 func _on_body_entered(body):
-	if body.is_in_group("Target") && body.has_method("Hit_Successful"):
-		body.Hit_Successful(size)
-		emit_signal("Hit_Successfull")
-
+	print('======================= EXPLOSIVE BULLETS ================', bullet_type)
+	
+	sleeping = true
+	if(bullet_type == Bullet_Types.EXPLOSIVE):
+		
+		call_delayed(func():  add_child(instantiate_an_explosion()), 1)
+	
+#	if body.is_in_group("Target") && body.has_method("Hit_Successful"):
+#		body.Hit_Successful(self.size)
+#		emit_signal("Hit_Successfull")
 #	queue_free()
 
 func _on_timer_timeout():
+	print('Bullet Timedout')
 	queue_free()

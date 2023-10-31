@@ -1,0 +1,42 @@
+[gd_scene load_steps=6 format=3 uid="uid://b7bxacnhhksl8"]
+
+[ext_resource type="Material" uid="uid://uylhy3ucrinn" path="res://addons/kenney_prototype_tools/materials/purple/material_04.tres" id="1_33p6w"]
+[ext_resource type="Material" uid="uid://kyy10l132lyl" path="res://addons/kenney_prototype_tools/materials/purple/material_08.tres" id="2_dugbo"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_uue0v"]
+material = ExtResource("1_33p6w")
+size = Vector3(5, 0.25, 5)
+
+[sub_resource type="BoxMesh" id="BoxMesh_p2dw3"]
+material = ExtResource("2_dugbo")
+size = Vector3(5, 0.25, 5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_qpuwr"]
+size = Vector3(4, 0.25, 4)
+
+[node name="Helicopter_Pad" type="Node3D"]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("BoxMesh_uue0v")
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1.32, 0, 0, 0, 0.1, 0, 0, -2.3)
+mesh = SubResource("BoxMesh_p2dw3")
+
+[node name="MeshInstance3D3" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1.32, 0, 0, 0, 0.1, 0, 0, 2.7)
+mesh = SubResource("BoxMesh_p2dw3")
+
+[node name="MeshInstance3D4" type="MeshInstance3D" parent="."]
+transform = Transform3D(-4.37114e-08, 0, 0.1, 0, 1.32, 0, -1, 0, -4.37114e-09, 2.3, 0, 0)
+mesh = SubResource("BoxMesh_p2dw3")
+
+[node name="MeshInstance3D5" type="MeshInstance3D" parent="."]
+transform = Transform3D(-4.37114e-08, 0, 0.1, 0, 1.32, 0, -1, 0, -4.37114e-09, -2.5, 0, 0)
+mesh = SubResource("BoxMesh_p2dw3")
+
+[node name="landing_area" type="Area3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="landing_area"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 0)
+shape = SubResource("BoxShape3D_qpuwr")

@@ -12,20 +12,22 @@ class_name Dummy extends CharacterBody3D
 @onready var audio_stream_player: AudioStreamPlayer3D = %AudioStreamPlayer3D
 @onready var weapon_parent: Node3D = %Weapon
 @onready var area_of_operation: Area3D = %AreaOfOperation
+@onready var animation_player: AnimationPlayer = %AnimationPlayer
+
+# https://stackoverflow.com/questions/75617655/when-should-i-use-a-kinematicbody-or-a-rigidbody-for-2d-platformer-characters
 
 # Get the gravity from the project settings to be synced with RigidBody nodes.
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 var ragdoll = preload("res://npcs/skull/skull.tscn")
 # base npc
 # https://github.com/ValveSoftware/source-sdk-2013/blob/0d8dceea4310fde5706b3ce1c70609d72a38efdf/sp/src/game/server/ai_basenpc.h#L2713
-
 # https://github.com/ValveSoftware/source-sdk-2013/blob/0d8dceea4310fde5706b3ce1c70609d72a38efdf/sp/src/game/server/ai_basenpc.h#L1092
 # solve audio emiters /  signals
 # Import Health Resource 
 @export_category('Dummy Stats')
 @export var debugging = false 
 @export var jump_velocity: float = 4.5
-@export var movement_speed: float = 30
+@export var movement_speed: float = 30.0
 @export var acceleration = 10;
 @export var max_health := 100
 #implement mechanics either sprint or shield for this
@@ -37,9 +39,14 @@ var ragdoll = preload("res://npcs/skull/skull.tscn")
 # make global  
 func call_delayed(callable: Callable, delay: float):
 	get_tree().create_timer(delay, false).connect('timeout', callable)
+	
 # helper? 
 func distance_between_two_vectors_is_in_range(pos1: Vector3, pos2: Vector3, threshold: float) -> bool:
 	return pos1.distance_to(pos2) <= threshold
+
+func get_random_vector(xrange := 5.0, yrange := 5.0, zrange := 5.0) -> Vector3:
+	return Vector3(randf_range(-xrange, xrange), randf_range(-yrange, yrange), randf_range(-zrange, zrange))
+
 
  # because of a bug that occurs with _frame or something. 
 # fixable once i learn more about godot loading and preloading
@@ -86,7 +93,7 @@ func get_alert_state():
 enum Postures {
 	SITTING,
 	WALKING,
-	CROUCHED,
+	CROUCHED, # change collision box when crouched
 	RUNNING,
 	JUMPING,
 	CLIMBING,
@@ -280,6 +287,10 @@ func _physics_process(_delta: float) -> void:
 	# can eventually add the -y when flying 
 	# plus parachute action
 	return
+	
+func apply_forces():
+
+	pass
 
 """
 NAVIGATION + MOVEMENT
@@ -338,22 +349,11 @@ func move_to_target(delta: float) -> bool:
 	return false
 
 
-func _on_body_collision_body_entered(body) -> void:
-	if(!navigation_is_synced):
-		return
-#	print("What class am I  ", self.get_class())
-#	print('Collision body entered my  ', self.get_instance_id(), '  body collision  ', body.get_instance_id())
-	
-	if (body is Damage_Source.Bullet):
-		print('Bullet Collided with body   ', body.size)
-	pass # Replace with function body.
 
 
-func _on_body_collision_body_exited(body: Node3D) -> void:
-	if(!navigation_is_synced):
-		return
-		
-		
+
+func _on_body_collision_area_entered(area: Area3D) -> void:
+	print('Actors body collision area: ', area)
 	pass # Replace with function body.
 
 
@@ -381,8 +381,35 @@ func get_all_current_collisions():
 		print("I collided with ", collision.get_collider().name)
 
 
-func get_random_vector(xrange := 5.0, yrange := 5.0, zrange := 5.0) -> Vector3:
-	return Vector3(randf_range(-xrange, xrange), randf_range(-yrange, yrange), randf_range(-zrange, zrange))
+
+
+func _on_body_collision_body_entered(body) -> void:
+	if(!navigation_is_synced):
+		return
+#	print("What class am I  ", self.get_class())
+#	print('Collision body entered my  ', self.get_instance_id(), '  body collision  ', body.get_instance_id())
+	
+	if (body is Damage_Source.Bullet):
+#		print('This is the attacker', body.attacker)
+		var damage = Damage_Source.fromBullet(body, Vector3(1, 1, 1), Vector3(1, 1, 1), 1)
+		self.take_damage(damage)
+	
+	print('Body that entered me: ', body)
+	if (body is Damage_Source.Blast):
+		print('I GOT BLASTED')
+		var damage = Damage_Source.fromBlast()
+		self.take_damage(damage)
+	
+		
+	pass 
+
+
+func _on_body_collision_body_exited(body: Node3D) -> void:
+	if(!navigation_is_synced):
+		return
+		
+		
+	pass 
 
 
 
@@ -397,13 +424,23 @@ func get_current_health():
 	return current_health
 
 func take_damage(damage_source: Damage_Source) ->void:
-	set_current_health(current_health - damage_source._damage)
+	print('I just took ', damage_source.damage, ' damage from: ', damage_source.damage_type)
 	
-	
-	if self.get_current_health() <= 0:
-		# let the attacker know they killed a unit :
-		damage_source._attacker.killed_unit(self)
-		print('Attacker does not have the method: "killed_unit"', damage_source._attacker)
+#	set_current_health(current_health - damage_source.damage)
+	match damage_source.damage_type:
+		Damage_Source.Damage_Types.BULLET:
+			print('I took bullet damage')
+			pass
+		Damage_Source.Damage_Types.BLAST:
+			print('I took damage from a blast')
+			pass
+		
+	if get_current_health() <= 0:
+		print('I just got killed')
+		damage_source.attacker.killed_unit(self)
+		# start timer for perma death
+		# if timer == 5 
+			# go zombie
 		die()
 		
 	react_to_damage()
@@ -411,6 +448,7 @@ func take_damage(damage_source: Damage_Source) ->void:
 
 func react_to_damage():
 	pass
+
 
 
 func die() -> void:
@@ -425,14 +463,19 @@ func die() -> void:
 	based on which hitbox was hit.
 	https://www.youtube.com/watch?v=IBRLNdnZh60
 	"""	
-	
 	queue_free()
+	
 func spawn_ragdoll() -> void:
 	get_tree().get_root().add_child(ragdoll.instantiate())
 	return
 	
 func spawn_gibs():
 	pass 
+
+func killed_unit(unit: Node3D):
+	# play random kill sound:
+	# tally one KIA 
+	print('I just killed: ', unit)
 
 
 func is_alive():
@@ -480,7 +523,6 @@ func panic():
 ##################### Item / weapon Management
 """
 
-
 # change this because its based on the tree? 
 # figure this out 
 var current_weapon = null
@@ -527,6 +569,9 @@ func reload_weapon():
 	get_reload_time())
 
 
+func throw_grenade():
+	pass
+
 
 
 func should_reload_weapon():
@@ -565,16 +610,16 @@ func drop_item():
 
 
 """
-$$$$$$$$$$$$$$$ ATTACK METHODS
-
 ############### 
-			TARGETING METHODS
+			 ATTACK METHODS
+			 TARGETING METHODS
 ###############
 
 """
 # this is a value derived by the weapon being held
 # no weapon = 1 meter range for melee
 # make getter + setter and set range on drop and pickup and weapon switch 
+# add a raycast and target if the item is visible in this range 
 var attack_range: int = 0: set = set_attack_range, get = get_attack_range;
 func set_attack_range(_attack_range):
 	attack_range = _attack_range
@@ -594,6 +639,8 @@ func attack_target(_target: Node3D = null) -> void:
 	var target = _target
 	if !_target: 
 		target = find_nearest_node_in_group("Target")
+		if !target:
+			return
 	
 	if is_reloading:
 		return
@@ -737,10 +784,7 @@ func inspect_random_nearby_item():
 func sit_on_chair():
 	pass
 
-func killed_unit():
-	# play random kill sound:
-	# tally one KIA 
-	pass
+
 
 func healed_unit():
 	# play a sound
@@ -784,31 +828,31 @@ const DOT_45_DEGREE = 0.707106781187
 
 """
 AI Targeting system for that OS strategy game
+# get_first_enemy_visible
 # Calculates attack priority for a certain target
-# Sensors/ecm droids, non-military structures get lower priority
-# Get attacker weapon effect
-# check if this droid is assigned to a commander
-# find out if the current target is targeting our commander
-# check if this droid is assigned to a commander
-# find out if the current target is targeting our commander
-# Get weapon effect
-# See if attacker is using an EMP weapon
-# Calculate attack weight
-# Calculate damage this target suffered
-# FIXME Somewhere we get 0HP droids from
-# See if this type of a droid should be prioritized
-# Now calculate the overall weight
-# If attacking with EMP, try to avoid targets that were already "EMPed"
-# Now calculate the overall weight
-# Go for unfinished structures only if nothing else is found (same for non-visible structures)
-# EMP should only attack structures if no enemy droids are around
-# We prefer objects we can see and can attack immediately
-# If the object is too close to fire at, consider it to be at maximum range.
-# Penalty for units that are already considered doomed (but the missile might miss!)
-# Commander-related criterias
-# attached to a commander and don't have a target assigned by some order
-# if commander is being targeted by our target, try to defend the commander
-# fire support - go through all droids assigned to the commander
+	# Sensors/ecm droids, non-military structures get lower priority
+	# Get attacker weapon effect
+	# check if this droid is assigned to a commander
+	# find out if the current target is targeting our commander
+
+	# Get weapon effect
+		# See if attacker is using an EMP weapon
+		# Calculate attack weight
+		# Calculate damage this target suffered
+		# FIXME Somewhere we get 0HP droids from
+		# See if this type of a droid should be prioritized
+		# Now calculate the overall weight
+	# If attacking with EMP, try to avoid targets that were already "EMPed"
+	# Now calculate the overall weight
+	# Go for unfinished structures only if nothing else is found (same for non-visible structures)
+	# EMP should only attack structures if no enemy droids are around
+	# We prefer objects we can see and can attack immediately
+	# If the object is too close to fire at, consider it to be at maximum range.
+	# Penalty for units that are already considered doomed (but the missile might miss!)
+	# Commander-related criterias
+	# attached to a commander and don't have a target assigned by some order
+	# if commander is being targeted by our target, try to defend the commander
+	# fire support - go through all droids assigned to the commander
 
 
 
@@ -840,7 +884,7 @@ DZ - Drop Zone: An area where airborne troops or supplies are airdropped from ai
 
 # Shooter
 
-# Behvaior Tree Functions
+# Behvaior Tree Functions ?
 func reload_weapon():
 	# Implement logic to reload the weapon
 	ammo_count = 10  # Assuming a magazine size of 10
@@ -1159,6 +1203,8 @@ func sabotage_complete() -> bool:
 
 
 """
+
+
 
 
 

@@ -1,0 +1,21 @@
+[gd_scene load_steps=5 format=3 uid="uid://dth4r4yaphyas"]
+
+[ext_resource type="Script" path="res://weapons/blast.gd" id="1_jsxey"]
+[ext_resource type="Material" uid="uid://1t4lohjeej4d" path="res://addons/kenney_prototype_tools/materials/red/material_07.tres" id="2_8gs2x"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_lvg6m"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_eqf7n"]
+material = ExtResource("2_8gs2x")
+
+[node name="blast" type="Area3D"]
+script = ExtResource("1_jsxey")
+
+[node name="blast_area" type="CollisionShape3D" parent="."]
+unique_name_in_owner = true
+shape = SubResource("SphereShape3D_lvg6m")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("SphereMesh_eqf7n")
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]

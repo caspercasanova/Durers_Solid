@@ -1,0 +1,35 @@
+[gd_scene load_steps=6 format=3 uid="uid://cuh720g45raht"]
+
+[ext_resource type="Script" path="res://npcs/helicopter/helicopter.gd" id="1_mgh20"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_y7408"]
+albedo_color = Color(0, 0, 0, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_t2vvm"]
+material = SubResource("StandardMaterial3D_y7408")
+
+[sub_resource type="SphereMesh" id="SphereMesh_p8dop"]
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_v1rr5"]
+points = PackedVector3Array(0.5, 0.5, 0.5, 0.5, 0.5, -0.5, -0.5, 0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, -0.5, -0.5, 0.5, -0.5, -0.5, -0.5, 0.5, -0.5, -0.5, -0.5)
+
+[node name="helicopter" type="RigidBody3D"]
+script = ExtResource("1_mgh20")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(4, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+mesh = SubResource("BoxMesh_t2vvm")
+
+[node name="MeshInstance3D3" type="MeshInstance3D" parent="MeshInstance3D"]
+transform = Transform3D(0.83138, -0.024636, 0, 0.89107, 0.367771, 0, 0, 0, 0.57, 0.675, 0.4, 0)
+mesh = SubResource("BoxMesh_t2vvm")
+skeleton = NodePath("../..")
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="MeshInstance3D"]
+transform = Transform3D(0.3, 0, 0, 0, 1, 0, 0, 0, 1, -0.525, 0, 0)
+mesh = SubResource("SphereMesh_p8dop")
+skeleton = NodePath("../..")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(4, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+shape = SubResource("ConvexPolygonShape3D_v1rr5")

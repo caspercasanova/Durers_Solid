@@ -497,8 +497,7 @@ _data = {
 viewport_path = NodePath("Action Debugger/SubViewport")
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_3oh8y"]
-radius = 1.0
-height = 4.0
+height = 3.0
 
 [node name="dummymale" type="CharacterBody3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
@@ -697,7 +696,7 @@ shape = SubResource("CapsuleShape3D_wfwag")
 
 [node name="Weapon" type="Node3D" parent="Armature"]
 unique_name_in_owner = true
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.09038, 0.403333, 1)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.29038, 0.977892, 1)
 
 [node name="blaster_a" parent="Armature/Weapon" instance=ExtResource("2_qh65d")]
 transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 0, 0)
@@ -717,6 +716,7 @@ unique_name_in_owner = true
 shape = SubResource("CylinderShape3D_imcma")
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+unique_name_in_owner = true
 libraries = {
 "": SubResource("AnimationLibrary_tqg4h")
 }
@@ -764,5 +764,6 @@ shape = SubResource("CapsuleShape3D_3oh8y")
 
 [connection signal="body_entered" from="Armature/AreaOfOperation" to="." method="_on_area_of_operation_body_entered"]
 [connection signal="body_exited" from="Armature/AreaOfOperation" to="." method="_on_area_of_operation_body_exited"]
+[connection signal="area_entered" from="Body_Collision" to="." method="_on_body_collision_area_entered"]
 [connection signal="body_entered" from="Body_Collision" to="." method="_on_body_collision_body_entered"]
 [connection signal="body_exited" from="Body_Collision" to="." method="_on_body_collision_body_exited"]

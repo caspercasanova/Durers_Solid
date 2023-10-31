@@ -5,15 +5,15 @@ var Damage: int
 signal Hit_Successfull
 
 func _on_body_entered(_body):
-	Explode()
+	explode()
 	queue_free()
 	
 
 func _on_timer_timeout():
-	Explode()
+	explode()
 	queue_free()
 
-func Explode():
+func explode():
 	var ex = Explosion.instantiate()
 	ex.set_global_transform(get_global_transform())
 	var world = get_tree().get_root().get_child(0)
